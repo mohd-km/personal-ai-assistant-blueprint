@@ -1,19 +1,49 @@
 import {
+  PIPELINE_NODES,
   COMMAND_SCENARIOS,
   FAILOVER_PROVIDERS,
-  BRAIN_FOLDERS
+  BRAIN_FOLDERS,
+  BLUEPRINT_OPTIONS
 } from './data/blueprintData.js';
+import {
+  generateAgentsMd,
+  generateConfigJson,
+  generateMainMemoryMd,
+  createZipBlob,
+  triggerDownload
+} from './utils/starterKit.js';
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const state = {
+  // Packet router state
   activeCommandId: COMMAND_SCENARIOS[0].id,
-  traceStage: 0, // 0..4
-  approvalState: 'idle', // 'idle' | 'pending' | 'approved' | 'cancelled'
-  traceTimers: [],
+  selectedNodeId: PIPELINE_NODES[0].id,
+  packetProgress: 0, // 0..4 (float along 5 nodes)
+  currentHopIndex: 0, // 0..4
+  approvalState: 'pending', // 'idle' | 'pending' | 'approved' | 'cancelled'
+  speed: 1,
+  rafId: null,
+  lastFrameTs: 0,
+
+  // Failover state
   providersOnline: {
     antigravity: true,
     claude: true,
     codex: true
   },
+
+  // Blueprint generator state
+  builder: {
+    ownerName: 'Alex',
+    channels: ['telegram'],
+    storage: 'drive',
+    models: ['antigravity', 'claude', 'codex'],
+    approvalGate: true,
+    activeTab: 'agents'
+  },
+
+  // 5-Folder explorer state
   activeFolderId: BRAIN_FOLDERS[0].id
 };
 
@@ -31,6 +61,10 @@ function escapeHtml(value) {
 
 function getActiveProvider() {
   return FAILOVER_PROVIDERS.find((p) => state.providersOnline[p.id]) || null;
+}
+
+function getActiveScenario() {
+  return COMMAND_SCENARIOS.find((c) => c.id === state.activeCommandId) || COMMAND_SCENARIOS[0];
 }
 
 /* ---------------- HEADER & PROGRESS ---------------- */
@@ -66,11 +100,13 @@ function initHeaderAndProgress() {
   }
 }
 
-/* ---------------- SANDBOX 1: COMMAND SIMULATOR ---------------- */
+/* ---------------- SIMULATION 1: ANIMATED PACKET ROUTER ---------------- */
 
-function clearTraceTimers() {
-  state.traceTimers.forEach((id) => window.clearTimeout(id));
-  state.traceTimers = [];
+function stopPacketAnimation() {
+  if (state.rafId !== null) {
+    window.cancelAnimationFrame(state.rafId);
+    state.rafId = null;
+  }
 }
 
 function renderCommandButtons() {
@@ -95,128 +131,326 @@ function renderCommandButtons() {
   container.querySelectorAll('.command-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const id = btn.getAttribute('data-command-id');
-      if (id) runCommandSimulation(id);
+      if (id) runPacketSimulation(id);
     });
   });
 }
 
-function getHarnessStepCopy(scenario) {
-  const activeProvider = getActiveProvider();
-  if (!activeProvider) {
-    return {
-      badge: 'WAITING FOR MODEL',
-      summary: 'All three AI providers are switched off in Sandbox 2. Your request stays queued locally until any provider is back online.',
-      detail: 'Turn on Antigravity, Claude, or Codex below'
-    };
-  }
-
-  const isPrimary = activeProvider.priority === 1;
-  return {
-    badge: isPrimary ? `${activeProvider.name.toUpperCase()} ACTIVE` : `REROUTED TO ${activeProvider.name.toUpperCase()}`,
-    summary: isPrimary
-      ? scenario.steps.harness.summary
-      : `Primary assistant is off, so ${activeProvider.name} steps in automatically with the exact same memory folder.`,
-    detail: `Handled by ${activeProvider.name} (${activeProvider.plan.toLowerCase()}, $0 extra API cost)`
-  };
+function createSvgEl(tag, attrs = {}) {
+  const el = document.createElementNS(SVG_NS, tag);
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, String(v)));
+  return el;
 }
 
-function renderTrace() {
-  const scenario = COMMAND_SCENARIOS.find((c) => c.id === state.activeCommandId) || COMMAND_SCENARIOS[0];
+function getNodeStatus(nodeIndex) {
+  const scenario = getActiveScenario();
+  const reached = state.packetProgress >= nodeIndex - 0.02;
+  const completed = state.packetProgress > nodeIndex + 0.05;
+
+  if (nodeIndex === 4 && reached) {
+    if (scenario.needsApproval && state.approvalState === 'pending') return 'is-paused';
+    if (scenario.needsApproval && state.approvalState === 'cancelled') return 'is-blocked';
+    return 'is-visited';
+  }
+  if (completed) return 'is-visited';
+  if (reached) return 'is-current';
+  return '';
+}
+
+function renderSvgPipeline() {
+  const edgesGroup = document.getElementById('svg-edges');
+  const nodesGroup = document.getElementById('svg-nodes');
+  const packetGroup = document.getElementById('svg-packet');
+  if (!edgesGroup || !nodesGroup || !packetGroup) return;
+
+  const scenario = getActiveScenario();
+  const activeProvider = getActiveProvider();
+
+  // 1. Render connecting edges
+  edgesGroup.innerHTML = '';
+  for (let i = 0; i < PIPELINE_NODES.length - 1; i += 1) {
+    const a = PIPELINE_NODES[i];
+    const b = PIPELINE_NODES[i + 1];
+    const x1 = a.x + 62;
+    const x2 = b.x - 62;
+    const y = a.y;
+
+    edgesGroup.appendChild(
+      createSvgEl('line', {
+        x1,
+        y1: y,
+        x2,
+        y2: y,
+        class: 'svg-edge-bg'
+      })
+    );
+
+    const edgeDone = state.packetProgress >= i + 1;
+    const edgeActive = state.packetProgress > i && state.packetProgress < i + 1;
+    const isCancelledFinal =
+      i === 3 && scenario.needsApproval && state.approvalState === 'cancelled';
+
+    if (edgeDone || edgeActive) {
+      let cls = 'svg-edge-active';
+      if (isCancelledFinal) cls = 'svg-edge-blocked';
+      else if (edgeDone) cls = 'svg-edge-done';
+
+      edgesGroup.appendChild(
+        createSvgEl('line', {
+          x1,
+          y1: y,
+          x2,
+          y2: y,
+          class: cls
+        })
+      );
+    }
+
+    // Small directional chevron at midpoint
+    const midX = (x1 + x2) / 2;
+    edgesGroup.appendChild(
+      createSvgEl('path', {
+        d: `M ${midX - 4} ${y - 4} L ${midX + 3} ${y} L ${midX - 4} ${y + 4}`,
+        fill: 'none',
+        stroke: edgeDone ? '#15803d' : edgeActive ? '#1e40af' : '#b8b8b2',
+        'stroke-width': '1.8',
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round'
+      })
+    );
+  }
+
+  // 2. Render clickable nodes
+  nodesGroup.innerHTML = '';
+  PIPELINE_NODES.forEach((node, idx) => {
+    const statusClass = getNodeStatus(idx);
+    const isSelected = node.id === state.selectedNodeId;
+    const g = createSvgEl('g', {
+      class: `svg-node-group ${statusClass} ${isSelected ? 'is-selected' : ''}`,
+      tabindex: '0',
+      role: 'button',
+      'aria-label': `Inspect ${node.shortLabel} (${node.subLabel})`,
+      'data-node-id': node.id
+    });
+
+    // Card rectangle
+    g.appendChild(
+      createSvgEl('rect', {
+        x: node.x - 62,
+        y: node.y - 42,
+        width: 124,
+        height: 84,
+        rx: 10,
+        class: 'svg-node-box'
+      })
+    );
+
+    // Step index top-left
+    const idxText = createSvgEl('text', {
+      x: node.x - 50,
+      y: node.y - 22,
+      class: 'svg-node-badge'
+    });
+    idxText.textContent = `0${idx + 1}`;
+    g.appendChild(idxText);
+
+    // Dynamic badge top-right for Cloud & Approval Gate
+    if (node.id === 'cloud') {
+      const modelBadge = createSvgEl('text', {
+        x: node.x + 50,
+        y: node.y - 22,
+        'text-anchor': 'end',
+        class: 'svg-node-badge'
+      });
+      modelBadge.textContent = activeProvider ? activeProvider.name : 'Paused';
+      modelBadge.setAttribute('fill', activeProvider ? '#15803d' : '#b45309');
+      g.appendChild(modelBadge);
+    } else if (node.id === 'approval-gate') {
+      const gateBadge = createSvgEl('text', {
+        x: node.x + 50,
+        y: node.y - 22,
+        'text-anchor': 'end',
+        class: 'svg-node-badge'
+      });
+      if (scenario.needsApproval && state.approvalState === 'pending') {
+        gateBadge.textContent = 'PAUSE';
+        gateBadge.setAttribute('fill', '#b45309');
+      } else if (scenario.needsApproval && state.approvalState === 'cancelled') {
+        gateBadge.textContent = 'BLOCKED';
+        gateBadge.setAttribute('fill', '#b91c1c');
+      } else if (state.packetProgress >= 4) {
+        gateBadge.textContent = 'PASSED';
+        gateBadge.setAttribute('fill', '#15803d');
+      } else {
+        gateBadge.textContent = 'LOCK';
+        gateBadge.setAttribute('fill', '#666662');
+      }
+      g.appendChild(gateBadge);
+    }
+
+    // Node Title
+    const titleEl = createSvgEl('text', {
+      x: node.x,
+      y: node.y + 4,
+      'text-anchor': 'middle',
+      class: 'svg-node-title'
+    });
+    titleEl.textContent = node.shortLabel;
+    g.appendChild(titleEl);
+
+    // Node Subtitle
+    const subEl = createSvgEl('text', {
+      x: node.x,
+      y: node.y + 23,
+      'text-anchor': 'middle',
+      class: 'svg-node-sub'
+    });
+    subEl.textContent = node.subLabel;
+    g.appendChild(subEl);
+
+    // Click & keyboard handlers
+    const selectNode = () => {
+      state.selectedNodeId = node.id;
+      renderSvgPipeline();
+      renderNodeInspector();
+    };
+    g.addEventListener('click', selectNode);
+    g.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectNode();
+      }
+    });
+
+    nodesGroup.appendChild(g);
+  });
+
+  // 3. Render animated traveling packet pill
+  packetGroup.innerHTML = '';
+  const clamped = Math.min(4, Math.max(0, state.packetProgress));
+  const segIndex = Math.min(3, Math.floor(clamped));
+  const segFrac = clamped - segIndex;
+  const fromNode = PIPELINE_NODES[segIndex];
+  const toNode = PIPELINE_NODES[segIndex + 1];
+  const px = fromNode.x + (toNode.x - fromNode.x) * segFrac;
+  const py = fromNode.y - 58;
+
+  let packetColor = '#1e40af';
+  let packetLabel = scenario.packetTag;
+  if (clamped >= 3.98) {
+    if (scenario.needsApproval && state.approvalState === 'pending') {
+      packetColor = '#b45309';
+      packetLabel = 'AWAITING TAP';
+    } else if (scenario.needsApproval && state.approvalState === 'cancelled') {
+      packetColor = '#b91c1c';
+      packetLabel = 'CANCELLED';
+    } else {
+      packetColor = '#15803d';
+      packetLabel = 'COMPLETE';
+    }
+  }
+
+  // Stem line from packet pill down to track
+  packetGroup.appendChild(
+    createSvgEl('line', {
+      x1: px,
+      y1: py + 12,
+      x2: px,
+      y2: fromNode.y - 42,
+      stroke: packetColor,
+      'stroke-width': '1.6',
+      'stroke-dasharray': '3 3'
+    })
+  );
+
+  // Packet pill
+  packetGroup.appendChild(
+    createSvgEl('rect', {
+      x: px - 52,
+      y: py - 12,
+      width: 104,
+      height: 24,
+      rx: 12,
+      fill: packetColor
+    })
+  );
+
+  const pText = createSvgEl('text', {
+    x: px,
+    y: py + 4,
+    'text-anchor': 'middle',
+    fill: '#ffffff',
+    'font-family': 'JetBrains Mono, monospace',
+    'font-size': '10',
+    'font-weight': '500'
+  });
+  pText.textContent = packetLabel;
+  packetGroup.appendChild(pText);
+}
+
+function renderTelemetryAndGate() {
+  const scenario = getActiveScenario();
+  const activeProvider = getActiveProvider();
   const promptEl = document.getElementById('trace-prompt');
-  const stepsEl = document.getElementById('trace-steps');
+  const tagPill = document.getElementById('packet-tag-pill');
+  const telemetryEl = document.getElementById('telemetry-strip');
   const drawerEl = document.getElementById('approval-drawer');
 
-  if (!promptEl || !stepsEl || !drawerEl) return;
+  if (promptEl) promptEl.textContent = scenario.prompt;
+  if (tagPill) tagPill.textContent = scenario.packetTag;
 
-  promptEl.textContent = scenario.prompt;
+  const reachedEnd = state.packetProgress >= 3.98;
+  const totalMs = PIPELINE_NODES.slice(0, state.currentHopIndex + 1).reduce(
+    (sum, n) => sum + n.latencyMs,
+    0
+  );
 
-  const harnessCopy = getHarnessStepCopy(scenario);
-  const outcomeData =
-    scenario.needsApproval && state.approvalState === 'cancelled'
-      ? scenario.steps.cancelledOutcome
-      : scenario.steps.outcome;
-
-  const stepDefs = [
-    {
-      num: 'STEP 01',
-      title: scenario.steps.router.title,
-      badge: scenario.steps.router.badge,
-      summary: scenario.steps.router.summary,
-      detail: scenario.steps.router.detail
-    },
-    {
-      num: 'STEP 02',
-      title: scenario.steps.harness.title,
-      badge: harnessCopy.badge,
-      summary: harnessCopy.summary,
-      detail: harnessCopy.detail
-    },
-    {
-      num: 'STEP 03',
-      title: scenario.steps.gate.title,
-      badge:
-        scenario.needsApproval && state.approvalState === 'approved'
-          ? 'APPROVED BY YOU'
-          : scenario.needsApproval && state.approvalState === 'cancelled'
-            ? 'BLOCKED BY YOU'
-            : scenario.steps.gate.badge,
-      summary: scenario.steps.gate.summary,
-      detail: scenario.steps.gate.detail
-    },
-    {
-      num: 'STEP 04',
-      title: outcomeData.title,
-      badge: outcomeData.badge,
-      summary: outcomeData.summary,
-      detail: outcomeData.detail
+  let statusText = `HOP 0${state.currentHopIndex + 1} / 05`;
+  let statusClass = 'is-accent';
+  if (reachedEnd) {
+    if (scenario.needsApproval && state.approvalState === 'pending') {
+      statusText = 'PAUSED AT GATE';
+      statusClass = 'is-warn';
+    } else if (scenario.needsApproval && state.approvalState === 'cancelled') {
+      statusText = 'SAFELY CANCELLED';
+      statusClass = 'is-block';
+    } else {
+      statusText = scenario.outcomeApproved.badge;
+      statusClass = 'is-ok';
     }
-  ];
+  }
 
-  stepsEl.innerHTML = stepDefs
-    .map((step, index) => {
-      const stepNumber = index + 1;
-      let statusClass = '';
-      let pillClass = 'pill-neutral';
+  if (telemetryEl) {
+    telemetryEl.innerHTML = `
+      <div class="telemetry-cell">
+        <div class="telemetry-label">Active Model</div>
+        <div class="telemetry-val ${activeProvider ? 'is-ok' : 'is-warn'}">
+          ${activeProvider ? escapeHtml(activeProvider.name) : 'All Offline'}
+        </div>
+      </div>
+      <div class="telemetry-cell">
+        <div class="telemetry-label">Packet State</div>
+        <div class="telemetry-val ${statusClass}">${escapeHtml(statusText)}</div>
+      </div>
+      <div class="telemetry-cell">
+        <div class="telemetry-label">Route Latency</div>
+        <div class="telemetry-val">${totalMs} ms</div>
+      </div>
+      <div class="telemetry-cell">
+        <div class="telemetry-label">Extra API Cost</div>
+        <div class="telemetry-val is-ok">$0.00</div>
+      </div>
+    `;
+  }
 
-      if (stepNumber < state.traceStage) {
-        statusClass = 'is-done';
-        pillClass = 'pill-emerald';
-      } else if (stepNumber === state.traceStage) {
-        if (stepNumber === 3 && scenario.needsApproval && state.approvalState === 'pending') {
-          statusClass = 'is-paused';
-          pillClass = 'pill-amber';
-        } else if (stepNumber === 4 && state.approvalState === 'cancelled') {
-          statusClass = 'is-cancelled';
-          pillClass = 'pill-crimson';
-        } else if (stepNumber === 4) {
-          statusClass = 'is-done';
-          pillClass = 'pill-emerald';
-        } else {
-          statusClass = 'is-active';
-          pillClass = 'pill-amber';
-        }
-      }
+  if (!drawerEl) return;
 
-      return `
-        <li class="trace-step ${statusClass}">
-          <div class="trace-step-top">
-            <span class="trace-step-num">${escapeHtml(step.num)}</span>
-            <span class="step-pill ${pillClass}">${escapeHtml(step.badge)}</span>
-          </div>
-          <h3 class="trace-step-title">${escapeHtml(step.title)}</h3>
-          <p class="trace-step-summary">${escapeHtml(step.summary)}</p>
-          <div class="trace-step-detail">${escapeHtml(step.detail)}</div>
-        </li>
-      `;
-    })
-    .join('');
-
-  if (scenario.needsApproval && state.approvalState === 'pending' && state.traceStage === 3) {
+  if (reachedEnd && scenario.needsApproval && state.approvalState === 'pending') {
     drawerEl.hidden = false;
     drawerEl.innerHTML = `
       <div class="approval-head">
-        <h3 class="approval-title">Safety Approval Gate — Waiting for Your Decision</h3>
-        <span class="step-pill pill-amber">OUTWARD ACTION PAUSED</span>
+        <h3 class="approval-title">Approval Gate — Waiting for Your Decision</h3>
+        <span class="step-pill pill-warn">OUTWARD ACTION PAUSED</span>
       </div>
       <div class="approval-draft">
         <p><strong>To:</strong> ${escapeHtml(scenario.draftPreview.to)}</p>
@@ -224,27 +458,29 @@ function renderTrace() {
         <p>${escapeHtml(scenario.draftPreview.body)}</p>
       </div>
       <div class="approval-actions">
-        <button type="button" class="btn btn-emerald" id="approve-send-btn">Approve &amp; Send</button>
+        <button type="button" class="btn btn-ok" id="approve-send-btn">Approve &amp; Send</button>
         <button type="button" class="btn-ghost" id="cancel-send-btn">Cancel Send</button>
       </div>
     `;
 
     const approveBtn = document.getElementById('approve-send-btn');
     const cancelBtn = document.getElementById('cancel-send-btn');
-
     if (approveBtn) {
       approveBtn.addEventListener('click', () => {
         state.approvalState = 'approved';
-        state.traceStage = 4;
-        renderTrace();
+        state.selectedNodeId = 'approval-gate';
+        renderSvgPipeline();
+        renderTelemetryAndGate();
+        renderNodeInspector();
       });
     }
-
     if (cancelBtn) {
       cancelBtn.addEventListener('click', () => {
         state.approvalState = 'cancelled';
-        state.traceStage = 4;
-        renderTrace();
+        state.selectedNodeId = 'approval-gate';
+        renderSvgPipeline();
+        renderTelemetryAndGate();
+        renderNodeInspector();
       });
     }
   } else {
@@ -253,34 +489,336 @@ function renderTrace() {
   }
 }
 
-function runCommandSimulation(commandId) {
-  clearTraceTimers();
+function renderNodeInspector() {
+  const inspector = document.getElementById('node-inspector');
+  if (!inspector) return;
+
+  const node = PIPELINE_NODES.find((n) => n.id === state.selectedNodeId) || PIPELINE_NODES[0];
+  const scenario = getActiveScenario();
+  let hopPayload = scenario.hopDetails[node.id] || node.summary;
+
+  if (node.id === 'approval-gate' && state.packetProgress >= 3.98) {
+    if (scenario.needsApproval && state.approvalState === 'approved') {
+      hopPayload = scenario.outcomeApproved.detail;
+    } else if (scenario.needsApproval && state.approvalState === 'cancelled') {
+      hopPayload = scenario.outcomeCancelled.detail;
+    }
+  }
+
+  inspector.innerHTML = `
+    <div class="inspector-top">
+      <h3 class="inspector-title">Hop 0${node.index + 1}: ${escapeHtml(node.shortLabel)} &mdash; ${escapeHtml(node.role)}</h3>
+      <span class="step-pill pill-neutral">${node.latencyMs > 0 ? `${node.latencyMs} ms hop` : 'Human gate'}</span>
+    </div>
+    <p class="inspector-payload">${escapeHtml(hopPayload)}</p>
+    <p class="inspector-summary">${escapeHtml(node.summary)}</p>
+    <details class="editorial-drawer">
+      <summary>Architecture note for ${escapeHtml(node.shortLabel)}</summary>
+      <div class="drawer-body"><p>${escapeHtml(node.deepNote)}</p></div>
+    </details>
+  `;
+}
+
+function runPacketSimulation(commandId) {
+  stopPacketAnimation();
   state.activeCommandId = commandId;
-  const scenario = COMMAND_SCENARIOS.find((c) => c.id === commandId) || COMMAND_SCENARIOS[0];
+  const scenario = getActiveScenario();
   state.approvalState = scenario.needsApproval ? 'pending' : 'idle';
+  state.selectedNodeId = PIPELINE_NODES[0].id;
   renderCommandButtons();
 
-  const targetFinalStage = scenario.needsApproval ? 3 : 4;
-
   if (prefersReducedMotion()) {
-    state.traceStage = targetFinalStage;
-    renderTrace();
+    state.packetProgress = 4;
+    state.currentHopIndex = 4;
+    state.selectedNodeId = 'approval-gate';
+    renderSvgPipeline();
+    renderTelemetryAndGate();
+    renderNodeInspector();
     return;
   }
 
-  state.traceStage = 1;
-  renderTrace();
+  state.packetProgress = 0;
+  state.currentHopIndex = 0;
+  state.lastFrameTs = performance.now();
+  renderSvgPipeline();
+  renderTelemetryAndGate();
+  renderNodeInspector();
 
-  for (let stage = 2; stage <= targetFinalStage; stage += 1) {
-    const timerId = window.setTimeout(() => {
-      state.traceStage = stage;
-      renderTrace();
-    }, (stage - 1) * 320);
-    state.traceTimers.push(timerId);
+  const stepFrame = (now) => {
+    const dt = Math.min(0.06, (now - state.lastFrameTs) / 1000);
+    state.lastFrameTs = now;
+
+    // 1.35 hops per second at 1x speed
+    state.packetProgress = Math.min(4, state.packetProgress + dt * 1.35 * state.speed);
+    const nextHop = Math.min(4, Math.floor(state.packetProgress + 0.05));
+
+    if (nextHop !== state.currentHopIndex) {
+      state.currentHopIndex = nextHop;
+      state.selectedNodeId = PIPELINE_NODES[nextHop].id;
+      renderTelemetryAndGate();
+      renderNodeInspector();
+    }
+
+    renderSvgPipeline();
+
+    if (state.packetProgress < 4) {
+      state.rafId = window.requestAnimationFrame(stepFrame);
+    } else {
+      state.rafId = null;
+      state.currentHopIndex = 4;
+      state.selectedNodeId = 'approval-gate';
+      renderSvgPipeline();
+      renderTelemetryAndGate();
+      renderNodeInspector();
+    }
+  };
+
+  state.rafId = window.requestAnimationFrame(stepFrame);
+}
+
+/* ---------------- TOOL 2: CUSTOM BLUEPRINT GENERATOR & EXPORTER ---------------- */
+
+function getPreviewContent() {
+  const tab = state.builder.activeTab;
+  if (tab === 'config') return generateConfigJson(state.builder);
+  if (tab === 'memory') return generateMainMemoryMd(state.builder);
+  return generateAgentsMd(state.builder);
+}
+
+function setExportFeedback(msg) {
+  const el = document.getElementById('export-feedback');
+  if (!el) return;
+  el.textContent = msg;
+  window.clearTimeout(el._timer);
+  el._timer = window.setTimeout(() => {
+    el.textContent = '';
+  }, 3500);
+}
+
+function renderBlueprintBuilder() {
+  const channelBox = document.getElementById('channel-options');
+  const storageBox = document.getElementById('storage-options');
+  const modelBox = document.getElementById('model-options');
+  const gateBtn = document.getElementById('gate-toggle-btn');
+  const gateLabel = document.getElementById('gate-toggle-label');
+  const topologyEl = document.getElementById('builder-topology');
+  const codeEl = document.getElementById('preview-code-content');
+  const statsEl = document.getElementById('preview-stats');
+
+  if (channelBox) {
+    channelBox.innerHTML = BLUEPRINT_OPTIONS.channels
+      .map((opt) => {
+        const selected = state.builder.channels.includes(opt.id);
+        return `
+          <button
+            type="button"
+            class="option-chip ${selected ? 'is-selected' : ''}"
+            data-channel="${escapeHtml(opt.id)}"
+            aria-pressed="${selected}"
+          >
+            <span class="option-chip-head">
+              <span class="option-chip-title">${escapeHtml(opt.label)}</span>
+              <span class="option-chip-badge">${selected ? 'ON' : 'OFF'}</span>
+            </span>
+            <span class="option-chip-sub">${escapeHtml(opt.detail)}</span>
+          </button>
+        `;
+      })
+      .join('');
+
+    channelBox.querySelectorAll('[data-channel]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-channel');
+        if (!id) return;
+        const exists = state.builder.channels.includes(id);
+        if (exists && state.builder.channels.length === 1) return; // keep at least 1
+        state.builder.channels = exists
+          ? state.builder.channels.filter((c) => c !== id)
+          : [...state.builder.channels, id];
+        renderBlueprintBuilder();
+      });
+    });
+  }
+
+  if (storageBox) {
+    storageBox.innerHTML = BLUEPRINT_OPTIONS.storage
+      .map((opt) => {
+        const selected = state.builder.storage === opt.id;
+        return `
+          <button
+            type="button"
+            class="option-chip ${selected ? 'is-selected' : ''}"
+            role="radio"
+            aria-checked="${selected}"
+            data-storage="${escapeHtml(opt.id)}"
+          >
+            <span class="option-chip-head">
+              <span class="option-chip-title">${escapeHtml(opt.label)}</span>
+              <span class="option-chip-badge">${selected ? 'BUS' : ''}</span>
+            </span>
+            <span class="option-chip-sub">${escapeHtml(opt.detail)}</span>
+          </button>
+        `;
+      })
+      .join('');
+
+    storageBox.querySelectorAll('[data-storage]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-storage');
+        if (!id) return;
+        state.builder.storage = id;
+        renderBlueprintBuilder();
+      });
+    });
+  }
+
+  if (modelBox) {
+    modelBox.innerHTML = BLUEPRINT_OPTIONS.models
+      .map((opt) => {
+        const idx = state.builder.models.indexOf(opt.id);
+        const selected = idx !== -1;
+        return `
+          <button
+            type="button"
+            class="option-chip ${selected ? 'is-selected' : ''}"
+            data-model="${escapeHtml(opt.id)}"
+            aria-pressed="${selected}"
+          >
+            <span class="option-chip-head">
+              <span class="option-chip-title">${escapeHtml(opt.label)}</span>
+              <span class="option-chip-badge">${selected ? `0${idx + 1}` : 'OFF'}</span>
+            </span>
+            <span class="option-chip-sub">${escapeHtml(opt.detail)}</span>
+          </button>
+        `;
+      })
+      .join('');
+
+    modelBox.querySelectorAll('[data-model]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-model');
+        if (!id) return;
+        const exists = state.builder.models.includes(id);
+        if (exists && state.builder.models.length === 1) return; // keep at least 1
+        state.builder.models = exists
+          ? state.builder.models.filter((m) => m !== id)
+          : [...state.builder.models, id];
+        renderBlueprintBuilder();
+      });
+    });
+  }
+
+  if (gateBtn && gateLabel) {
+    gateBtn.setAttribute('aria-checked', String(state.builder.approvalGate));
+    gateLabel.textContent = state.builder.approvalGate ? 'Enabled' : 'Manual';
+  }
+
+  if (topologyEl) {
+    const storageLabel =
+      BLUEPRINT_OPTIONS.storage.find((s) => s.id === state.builder.storage)?.label || 'Drive';
+    const channelLabels = state.builder.channels
+      .map((id) => BLUEPRINT_OPTIONS.channels.find((c) => c.id === id)?.label || id)
+      .join(' + ');
+    const modelLabels = state.builder.models
+      .map((id) => BLUEPRINT_OPTIONS.models.find((m) => m.id === id)?.label || id)
+      .join(' → ');
+
+    topologyEl.innerHTML = `
+      ROUTE: <strong>Laptop</strong> &rarr; <strong>${escapeHtml(storageLabel)}</strong> &rarr; <strong>${escapeHtml(modelLabels)}</strong> &rarr; <strong>${escapeHtml(channelLabels)}</strong> &rarr; <strong>${state.builder.approvalGate ? 'Approval Gate' : 'Inline Confirm'}</strong>
+    `;
+  }
+
+  // Update preview tabs & code
+  document.querySelectorAll('[data-preview-tab]').forEach((tabBtn) => {
+    const isActive = tabBtn.getAttribute('data-preview-tab') === state.builder.activeTab;
+    tabBtn.classList.toggle('is-active', isActive);
+    tabBtn.setAttribute('aria-selected', String(isActive));
+  });
+
+  const content = getPreviewContent();
+  if (codeEl) codeEl.textContent = content;
+  if (statsEl) {
+    const lines = content.trimEnd().split('\n').length;
+    const bytes = new TextEncoder().encode(content).length;
+    statsEl.textContent = `${lines} lines · ${bytes} B`;
   }
 }
 
-/* ---------------- SANDBOX 2: BREAK A MODEL ---------------- */
+function initBlueprintControls() {
+  const ownerInput = document.getElementById('owner-name-input');
+  if (ownerInput) {
+    ownerInput.addEventListener('input', () => {
+      state.builder.ownerName = ownerInput.value;
+      renderBlueprintBuilder();
+    });
+  }
+
+  const gateBtn = document.getElementById('gate-toggle-btn');
+  if (gateBtn) {
+    gateBtn.addEventListener('click', () => {
+      state.builder.approvalGate = !state.builder.approvalGate;
+      renderBlueprintBuilder();
+    });
+  }
+
+  document.querySelectorAll('[data-preview-tab]').forEach((tabBtn) => {
+    tabBtn.addEventListener('click', () => {
+      const tab = tabBtn.getAttribute('data-preview-tab');
+      if (!tab) return;
+      state.builder.activeTab = tab;
+      renderBlueprintBuilder();
+    });
+  });
+
+  const copyBtn = document.getElementById('copy-preview-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(getPreviewContent());
+        copyBtn.textContent = 'Copied';
+        window.setTimeout(() => {
+          copyBtn.textContent = 'Copy';
+        }, 1600);
+      } catch {
+        setExportFeedback('Copy unavailable in this browser; use Download instead.');
+      }
+    });
+  }
+
+  const zipBtn = document.getElementById('download-zip-btn');
+  if (zipBtn) {
+    zipBtn.addEventListener('click', () => {
+      const files = [
+        { name: 'AGENTS.md', content: generateAgentsMd(state.builder) },
+        { name: 'config.json', content: generateConfigJson(state.builder) },
+        { name: 'memory/main.md', content: generateMainMemoryMd(state.builder) }
+      ];
+      const blob = createZipBlob(files);
+      triggerDownload(blob, 'digital-brain-starter-kit.zip');
+      setExportFeedback('Downloaded digital-brain-starter-kit.zip (AGENTS.md + config.json + memory/main.md).');
+    });
+  }
+
+  const agentsBtn = document.getElementById('download-agents-btn');
+  if (agentsBtn) {
+    agentsBtn.addEventListener('click', () => {
+      const blob = new Blob([generateAgentsMd(state.builder)], { type: 'text/markdown;charset=utf-8' });
+      triggerDownload(blob, 'AGENTS.md');
+      setExportFeedback('Downloaded AGENTS.md.');
+    });
+  }
+
+  const configBtn = document.getElementById('download-config-btn');
+  if (configBtn) {
+    configBtn.addEventListener('click', () => {
+      const blob = new Blob([generateConfigJson(state.builder)], { type: 'application/json;charset=utf-8' });
+      triggerDownload(blob, 'config.json');
+      setExportFeedback('Downloaded config.json.');
+    });
+  }
+}
+
+/* ---------------- SIMULATION 2: FAILOVER SWITCH ---------------- */
 
 function renderFailover() {
   const statusBar = document.getElementById('failover-status-bar');
@@ -294,32 +832,22 @@ function renderFailover() {
   statusBar.innerHTML = `
     <div class="status-tile">
       <div class="status-tile-label">Active Assistant</div>
-      <div class="status-tile-value ${active ? 'is-emerald' : 'is-amber'}">
+      <div class="status-tile-value ${active ? 'is-ok' : 'is-warn'}">
         ${active ? escapeHtml(active.name) : 'Paused'}
       </div>
       <p class="status-tile-note">
-        ${
-          active
-            ? active.priority === 1
-              ? 'Primary assistant is handling requests normally.'
-              : `Failover active — ${active.name} took over with no interruption.`
-            : 'All providers are toggled off right now.'
-        }
+        ${active ? (active.priority === 1 ? 'Primary handling requests.' : `Failover active — ${active.name} took over.`) : 'All providers toggled off.'}
       </p>
     </div>
     <div class="status-tile">
       <div class="status-tile-label">Shared Memory</div>
-      <div class="status-tile-value is-emerald">100% Intact</div>
-      <p class="status-tile-note">
-        All ${onlineCount} online assistant${onlineCount === 1 ? '' : 's'} read the exact same Markdown folder.
-      </p>
+      <div class="status-tile-value is-ok">100% Intact</div>
+      <p class="status-tile-note">${onlineCount} online assistant${onlineCount === 1 ? '' : 's'} reading the same folder.</p>
     </div>
     <div class="status-tile">
       <div class="status-tile-label">Extra API Spend</div>
-      <div class="status-tile-value is-emerald">$0</div>
-      <p class="status-tile-note">
-        Stays inside existing flat-rate plans — never falls back to surprise metered bills.
-      </p>
+      <div class="status-tile-value is-ok">$0</div>
+      <p class="status-tile-note">Flat-rate plans only — zero metered fallback.</p>
     </div>
   `;
 
@@ -328,21 +856,20 @@ function renderFailover() {
     const isServing = active && active.id === provider.id;
 
     const cardClass = isServing ? 'is-serving' : !isOnline ? 'is-offline' : '';
-    const pillClass = isServing ? 'pill-emerald' : isOnline ? 'pill-neutral' : 'pill-crimson';
+    const pillClass = isServing ? 'pill-ok' : isOnline ? 'pill-neutral' : 'pill-block';
     const badgeLabel = isServing ? 'ACTIVE NOW' : isOnline ? 'STANDBY' : 'OFFLINE';
 
     return `
       <article class="provider-card ${cardClass}">
         <div>
           <div class="provider-top">
-            <span class="provider-priority">Priority ${provider.priority}</span>
+            <span class="provider-priority">Priority 0${provider.priority}</span>
             <span class="step-pill ${pillClass}">${badgeLabel}</span>
           </div>
           <h3 class="provider-name">${escapeHtml(provider.name)}</h3>
           <p class="provider-role">${escapeHtml(provider.role)}</p>
           <p class="provider-strength">${escapeHtml(provider.strength)}</p>
         </div>
-
         <div class="provider-controls">
           <span class="provider-plan">${escapeHtml(provider.plan)}</span>
           <button
@@ -353,9 +880,7 @@ function renderFailover() {
             aria-label="Toggle ${escapeHtml(provider.name)} ${isOnline ? 'off' : 'on'}"
             data-provider-id="${escapeHtml(provider.id)}"
           >
-            <span class="switch-track" aria-hidden="true">
-              <span class="switch-thumb"></span>
-            </span>
+            <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
             <span>${isOnline ? 'Online' : 'Offline'}</span>
           </button>
         </div>
@@ -369,14 +894,15 @@ function renderFailover() {
       if (!id) return;
       state.providersOnline[id] = !state.providersOnline[id];
       renderFailover();
-      renderTrace();
+      renderSvgPipeline();
+      renderTelemetryAndGate();
     });
   });
 
   emptyBanner.hidden = Boolean(active);
 }
 
-/* ---------------- SANDBOX 3: 5-FOLDER EXPLORER ---------------- */
+/* ---------------- REFERENCE 3: 5-FOLDER EXPLORER ---------------- */
 
 function renderFolderExplorer() {
   const listEl = document.getElementById('folder-list');
@@ -417,9 +943,7 @@ function renderFolderExplorer() {
   detailEl.innerHTML = `
     <div class="folder-detail-path">${escapeHtml(activeFolder.path)}</div>
     <h3 class="folder-detail-title">${escapeHtml(activeFolder.headline)}</h3>
-    <p class="folder-detail-copy">
-      ${escapeHtml(activeFolder.sentences[0])} ${escapeHtml(activeFolder.sentences[1])}
-    </p>
+    <p class="folder-detail-copy">${escapeHtml(activeFolder.shortSummary)}</p>
     <div class="folder-preview">
       <div class="folder-preview-bar">
         <span>${escapeHtml(activeFolder.sampleFile)}</span>
@@ -427,6 +951,10 @@ function renderFolderExplorer() {
       </div>
       <pre><code>${escapeHtml(activeFolder.sampleContent)}</code></pre>
     </div>
+    <details class="editorial-drawer">
+      <summary>Why ${escapeHtml(activeFolder.name)} outlasts locked-in chat histories</summary>
+      <div class="drawer-body"><p>${escapeHtml(activeFolder.deepNote)}</p></div>
+    </details>
   `;
 }
 
@@ -434,14 +962,25 @@ function renderFolderExplorer() {
 
 function init() {
   initHeaderAndProgress();
+  initBlueprintControls();
+  renderBlueprintBuilder();
   renderFailover();
   renderFolderExplorer();
-  runCommandSimulation(COMMAND_SCENARIOS[0].id);
+  runPacketSimulation(COMMAND_SCENARIOS[0].id);
+
+  const speedInput = document.getElementById('packet-speed');
+  const speedValue = document.getElementById('packet-speed-value');
+  if (speedInput && speedValue) {
+    speedInput.addEventListener('input', () => {
+      state.speed = parseFloat(speedInput.value) || 1;
+      speedValue.textContent = `${state.speed.toFixed(1)}x`;
+    });
+  }
 
   const replayBtn = document.getElementById('replay-trace-btn');
   if (replayBtn) {
     replayBtn.addEventListener('click', () => {
-      runCommandSimulation(state.activeCommandId);
+      runPacketSimulation(state.activeCommandId);
     });
   }
 
@@ -450,7 +989,8 @@ function init() {
     restoreBtn.addEventListener('click', () => {
       state.providersOnline = { antigravity: true, claude: true, codex: true };
       renderFailover();
-      renderTrace();
+      renderSvgPipeline();
+      renderTelemetryAndGate();
     });
   }
 }

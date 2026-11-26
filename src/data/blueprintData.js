@@ -1,154 +1,169 @@
 /**
- * Digital Brain Architecture — Client-Side Sandbox Data
+ * Digital Brain Architecture — Client-Side Sandbox & Blueprint Data
  * 100% synthetic examples. Zero PII, zero emojis, zero runtime tokens.
  */
 
+export const PIPELINE_NODES = [
+  {
+    id: 'laptop',
+    index: 0,
+    shortLabel: 'Laptop',
+    subLabel: 'Local Workspace',
+    x: 92,
+    y: 112,
+    latencyMs: 12,
+    role: 'Capture & local edits',
+    summary: 'Reads plain Markdown cards locally and stages every command with zero vendor lock-in.',
+    deepNote:
+      'Your desktop or laptop is a replaceable client, not the single point of failure. Any editor or AI harness opens the same local folder and writes clean diffs directly to disk.'
+  },
+  {
+    id: 'drive-bus',
+    index: 1,
+    shortLabel: 'Drive Bus',
+    subLabel: 'One Sync Bus',
+    x: 274,
+    y: 112,
+    latencyMs: 140,
+    role: 'Single file transport',
+    summary: 'Syncs Markdown notes and state between laptop and cloud on one deterministic file bus.',
+    deepNote:
+      'Using one shared sync bus eliminates fragile ad-hoc copies. Every machine converges on the same rules, memory cards, and execution trail within seconds.'
+  },
+  {
+    id: 'cloud',
+    index: 2,
+    shortLabel: 'Cloud',
+    subLabel: 'Always-On Node',
+    x: 456,
+    y: 112,
+    latencyMs: 280,
+    role: 'Failover AI runtime',
+    summary: 'Runs the active flat-rate assistant (Antigravity, Claude, or Codex) even while your laptop sleeps.',
+    deepNote:
+      'The cloud worker mounts the same synced folder and follows the priority waterfall. If the primary model hits quota or goes offline, the next model resumes with zero lost context.'
+  },
+  {
+    id: 'telegram',
+    index: 3,
+    shortLabel: 'Telegram',
+    subLabel: 'Mobile Control',
+    x: 638,
+    y: 112,
+    latencyMs: 95,
+    role: 'Remote prompt & receipt',
+    summary: 'Delivers crisp mobile updates and carries your one-tap confirmation back to the cloud worker.',
+    deepNote:
+      'Telegram acts as a lightweight control plane from your phone: short plain-text briefs, status pings, and explicit approval tokens—never noisy dashboards.'
+  },
+  {
+    id: 'approval-gate',
+    index: 4,
+    shortLabel: 'Approval Gate',
+    subLabel: 'Human Safety Lock',
+    x: 820,
+    y: 112,
+    latencyMs: 0,
+    role: 'Outward action firewall',
+    summary: 'Auto-passes private notes and lookups; pauses every external email, message, or payment for your tap.',
+    deepNote:
+      'Background tasks run under a restricted unattended flag. Any outward-facing tool is intercepted by the approval gate and cannot execute until you explicitly approve it.'
+  }
+];
+
 export const COMMAND_SCENARIOS = [
   {
+    id: 'email',
+    label: 'Send a client email',
+    category: 'Outward action',
+    prompt: '"Email Alex at Studio North with the revised timeline and confirm Thursday at 3 PM."',
+    preferredHarness: 'Claude',
+    needsApproval: true,
+    packetTag: 'OUTWARD DRAFT',
+    draftPreview: {
+      to: 'Alex — Studio North (synthetic contact)',
+      subject: 'Updated timeline + Thursday 3 PM check-in',
+      body: 'Hi Alex, sharing the updated two-week milestones below. Does Thursday at 3 PM still work to walk through them?'
+    },
+    hopDetails: {
+      laptop: 'Matched rules/writing-tone.md + memory-cards/studio-north.md',
+      'drive-bus': 'Synced 2 context files (4.2 KB) across the bus',
+      cloud: 'Drafted concise reply using active flat-rate assistant',
+      telegram: 'Pushed draft preview + approve/cancel prompt to phone',
+      'approval-gate': 'PAUSED — outward email waits for explicit owner tap'
+    },
+    outcomeApproved: {
+      badge: 'SENT AFTER APPROVAL',
+      summary: 'Email dispatched only after your tap, with a one-line receipt appended to execution-trail/.',
+      detail: 'Delivered to Alex · logged to execution-trail/recent.md'
+    },
+    outcomeCancelled: {
+      badge: 'SAFELY CANCELLED',
+      summary: 'Nothing was sent. Draft discarded cleanly and inbox stayed untouched.',
+      detail: 'Blocked by owner at Approval Gate'
+    }
+  },
+  {
     id: 'travel',
-    label: 'Remember my travel preference',
+    label: 'Remember travel preference',
     category: 'Save a note',
-    prompt: '"From now on, book window seats on morning flights and aisle seats on flights over four hours."',
+    prompt: '"Book window seats on morning flights and aisle seats on flights over four hours."',
     preferredHarness: 'Antigravity',
     needsApproval: false,
-    steps: {
-      router: {
-        title: 'Context Router',
-        badge: '1 FILE MATCHED',
-        summary: 'Finds your existing travel card instead of starting a blank chat or creating a duplicate note.',
-        detail: 'Opens memory-cards/travel.md (18 lines)'
-      },
-      harness: {
-        title: 'Assistant Selection',
-        badge: 'FAST LANE',
-        summary: 'Picks the first available assistant in your waterfall to make a clean, one-line update.',
-        detail: 'Uses active flat-rate assistant — zero extra API cost'
-      },
-      gate: {
-        title: 'Safety Approval Gate',
-        badge: 'AUTO-PASSED',
-        summary: 'This only updates your private notes and sends nothing to anyone outside. No pause needed.',
-        detail: 'Private write allowed automatically'
-      },
-      outcome: {
-        title: 'Outcome',
-        badge: 'SAVED EVERYWHERE',
-        summary: 'Your travel preference is saved in plain Markdown. Every AI assistant you open tomorrow already knows it.',
-        detail: 'Updated memory-cards/travel.md and logged 1 line to execution-trail/'
-      }
+    packetTag: 'PRIVATE WRITE',
+    hopDetails: {
+      laptop: 'Routed to existing memory-cards/travel.md (18 lines)',
+      'drive-bus': 'Mirrored 1-line diff (142 B) to cloud workspace',
+      cloud: 'Verified card format and updated shared index',
+      telegram: 'Silent completion — no mobile interruption needed',
+      'approval-gate': 'AUTO-PASSED — private note update, zero external sends'
+    },
+    outcomeApproved: {
+      badge: 'SAVED EVERYWHERE',
+      summary: 'Saved in plain Markdown; every assistant you open tomorrow already knows it.',
+      detail: 'Updated memory-cards/travel.md · 1 line logged'
     }
   },
   {
     id: 'schedule',
     label: "Check today's schedule",
     category: 'Quick lookup',
-    prompt: '"What is on my calendar today, and do I have a free two-hour block for deep work?"',
+    prompt: '"What is on my calendar today, and where is my cleanest 2-hour deep-work block?"',
     preferredHarness: 'Antigravity',
     needsApproval: false,
-    steps: {
-      router: {
-        title: 'Context Router',
-        badge: 'READ-ONLY',
-        summary: 'Pulls today’s calendar events and your focus-hours rule, ignoring unrelated folders.',
-        detail: 'Reads calendar + rules/focus-hours.md'
-      },
-      harness: {
-        title: 'Assistant Selection',
-        badge: 'INSTANT ANSWER',
-        summary: 'Routes to your active assistant for a fast, plain-English summary with open slots highlighted.',
-        detail: 'Uses active flat-rate assistant — zero extra API cost'
-      },
-      gate: {
-        title: 'Safety Approval Gate',
-        badge: 'AUTO-PASSED',
-        summary: 'Reading your own schedule cannot change anything or message anyone. Runs immediately.',
-        detail: 'Read-only action pre-approved'
-      },
-      outcome: {
-        title: 'Outcome',
-        badge: 'CLEAR BRIEF',
-        summary: 'Returns your three meetings today and flags 2:00 PM to 4:30 PM as your cleanest uninterrupted work block.',
-        detail: 'Delivered in 2 seconds with zero clutter'
-      }
-    }
-  },
-  {
-    id: 'email',
-    label: 'Send a client email',
-    category: 'Outward action',
-    prompt: '"Email Alex at Studio North with the revised project timeline and ask to confirm Thursday at 3 PM."',
-    preferredHarness: 'Claude',
-    needsApproval: true,
-    draftPreview: {
-      to: 'Alex — Studio North (synthetic contact)',
-      subject: 'Updated timeline + Thursday 3 PM check-in',
-      body: 'Hi Alex, sharing the updated two-week milestones below. Does Thursday at 3 PM still work to walk through them?'
+    packetTag: 'READ-ONLY',
+    hopDetails: {
+      laptop: 'Loaded rules/focus-hours.md + read-only calendar query',
+      'drive-bus': 'Checked latest focus rule checksum (in sync)',
+      cloud: 'Computed open slots and ranked 2:00–4:30 PM top block',
+      telegram: 'Returned 3-line plain-text brief in 2 seconds',
+      'approval-gate': 'AUTO-PASSED — read-only lookup cannot mutate state'
     },
-    steps: {
-      router: {
-        title: 'Context Router',
-        badge: '2 FILES MATCHED',
-        summary: 'Loads your writing tone rule and the Studio North project note so the draft sounds like you.',
-        detail: 'Reads rules/writing-tone.md + memory-cards/studio-north.md'
-      },
-      harness: {
-        title: 'Assistant Selection',
-        badge: 'WRITING LANE',
-        summary: 'Assigns the draft to your active assistant, keeping the tone calm, concise, and free of filler.',
-        detail: 'Drafted locally — nothing sent yet'
-      },
-      gate: {
-        title: 'Safety Approval Gate',
-        badge: 'PAUSED FOR YOU',
-        summary: 'Sending an email reaches someone outside your brain. The system stops and waits for your explicit tap.',
-        detail: 'Outward actions never fire unattended'
-      },
-      outcome: {
-        title: 'Outcome',
-        badge: 'SENT AFTER APPROVAL',
-        summary: 'Only after you approve does the email go out, with a one-line receipt saved to your execution trail.',
-        detail: 'Delivered to Alex and recorded in execution-trail/'
-      },
-      cancelledOutcome: {
-        title: 'Outcome',
-        badge: 'SAFELY CANCELLED',
-        summary: 'Nothing was sent. The draft was discarded cleanly and your inbox stayed untouched.',
-        detail: 'Blocked by owner at Safety Approval Gate'
-      }
+    outcomeApproved: {
+      badge: 'CLEAR BRIEF',
+      summary: 'Returns 3 meetings and flags 2:00 PM – 4:30 PM as your cleanest focus window.',
+      detail: 'Read-only · delivered in 2.0 s · $0 extra API cost'
     }
   },
   {
     id: 'research',
     label: 'Run overnight research',
     category: 'Background work',
-    prompt: '"Compare three lightweight static hosting options for a personal showcase and leave a short table by morning."',
+    prompt: '"Compare three lightweight static hosts and leave a 1-page table by 7 AM."',
     preferredHarness: 'Codex',
     needsApproval: false,
-    steps: {
-      router: {
-        title: 'Context Router',
-        badge: 'PLAYBOOK LOADED',
-        summary: 'Matches your saved research checklist so the output arrives as a crisp table, not a wall of text.',
-        detail: 'Reads playbooks/comparison-brief.md + lessons-learned/hosting.md'
-      },
-      harness: {
-        title: 'Assistant Selection',
-        badge: 'DEEP WORK LANE',
-        summary: 'Hands the long-running job to your always-on background assistant while your laptop sleeps.',
-        detail: 'Runs on flat-rate plan — zero surprise bills'
-      },
-      gate: {
-        title: 'Safety Approval Gate',
-        badge: 'AUTO-PASSED',
-        summary: 'Web reading and writing a local summary note stay strictly inside your workspace. Safe to run overnight.',
-        detail: 'No external sends or purchases'
-      },
-      outcome: {
-        title: 'Outcome',
-        badge: 'READY BY MORNING',
-        summary: 'A clean one-page comparison waits in your notes at 7:00 AM, already formatted the way you like to read.',
-        detail: 'Saved to memory-cards/hosting-comparison.md'
-      }
+    packetTag: 'BACKGROUND JOB',
+    hopDetails: {
+      laptop: 'Queued playbook playbooks/comparison-brief.md before sleep',
+      'drive-bus': 'Synced task brief to always-on cloud workspace',
+      cloud: 'Executed overnight comparison on flat-rate plan',
+      telegram: 'Sent 7:00 AM digest link to memory-cards/hosting-comparison.md',
+      'approval-gate': 'AUTO-PASSED — local research note, no outward side effects'
+    },
+    outcomeApproved: {
+      badge: 'READY BY MORNING',
+      summary: 'One-page table waiting in memory-cards/ at 7:00 AM in your exact format.',
+      detail: 'Saved to memory-cards/hosting-comparison.md'
     }
   }
 ];
@@ -168,7 +183,7 @@ export const FAILOVER_PROVIDERS = [
     name: 'Claude',
     role: 'First automatic backup',
     plan: 'Flat-rate plan',
-    strength: 'Steps in automatically for writing, planning, and careful reasoning.'
+    strength: 'Writing, structured planning, and careful reasoning.'
   },
   {
     id: 'codex',
@@ -176,7 +191,7 @@ export const FAILOVER_PROVIDERS = [
     name: 'Codex',
     role: 'Second automatic backup',
     plan: 'Flat-rate plan',
-    strength: 'Handles background builds, code checks, and overnight tasks.'
+    strength: 'Background builds, verification checks, and overnight runs.'
   }
 ];
 
@@ -185,12 +200,11 @@ export const BRAIN_FOLDERS = [
     id: 'rules',
     name: 'rules',
     path: 'brain/rules/',
-    tag: 'How every assistant behaves',
-    headline: 'One rulebook read by every AI you use.',
-    sentences: [
-      'Instead of repeating your preferences inside every new chat window, you write your standards once in a plain Markdown file that every assistant reads before starting.',
-      'If you switch tools next month, your habits and safety boundaries come with you untouched instead of staying trapped in one vendor’s settings.'
-    ],
+    tag: 'Shared behavior contract',
+    headline: 'One rulebook read by every assistant.',
+    shortSummary: 'Write your tone, formatting, and safety boundaries once in plain Markdown.',
+    deepNote:
+      'Instead of repeating preferences inside every new chat window, every assistant reads the same rulebook before starting. Switching tools next month preserves every habit untouched.',
     sampleFile: 'rules/core-rules.md',
     sampleContent: `# Core Rules
 
@@ -204,11 +218,10 @@ export const BRAIN_FOLDERS = [
     name: 'memory cards',
     path: 'brain/memory-cards/',
     tag: 'Durable personal facts',
-    headline: 'Small, tidy cards instead of buried chat threads.',
-    sentences: [
-      'Locked-in chat histories bury important facts under hundreds of old messages where you can never inspect or edit them cleanly.',
-      'Short Markdown cards keep one clear topic per file so you can read, fix, or delete any fact in seconds with any text editor.'
-    ],
+    headline: 'One tidy card per topic, never buried.',
+    shortSummary: 'Editable plain-text cards replace unsearchable vendor chat histories.',
+    deepNote:
+      'Locked-in chat histories bury key facts under hundreds of old messages. Short Markdown cards let you inspect, edit, or delete any fact in seconds with any text editor.',
     sampleFile: 'memory-cards/travel.md',
     sampleContent: `# Travel Preferences
 
@@ -222,11 +235,10 @@ export const BRAIN_FOLDERS = [
     name: 'lessons learned',
     path: 'brain/lessons-learned/',
     tag: 'Mistakes never repeated',
-    headline: 'Every correction makes every assistant smarter.',
-    sentences: [
-      'In a normal chat app, correcting a mistake only fixes that single conversation, so the same error returns next week in another tool.',
-      'Saving each lesson as a plain Markdown note means Antigravity, Claude, and Codex all inherit the fix automatically from that day forward.'
-    ],
+    headline: 'Correct once, upgrade every model.',
+    shortSummary: 'Every fix saved here is automatically inherited by all connected assistants.',
+    deepNote:
+      'In a normal chat app, correcting a mistake only fixes that single thread. Saving lessons in Markdown means Antigravity, Claude, and Codex all avoid the same error from that day forward.',
     sampleFile: 'lessons-learned/email-tone.md',
     sampleContent: `# Lessons Learned
 
@@ -238,12 +250,11 @@ export const BRAIN_FOLDERS = [
     id: 'playbooks',
     name: 'playbooks',
     path: 'brain/playbooks/',
-    tag: 'Repeatable step-by-step recipes',
-    headline: 'Turn recurring work into one-click checklists.',
-    sentences: [
-      'Chat silos force you to re-explain multi-step workflows from scratch every time you need a weekly review or research brief.',
-      'A Markdown playbook stores the exact steps and output format once, so any assistant can run the same reliable process on demand.'
-    ],
+    tag: 'Repeatable recipes',
+    headline: 'Turn recurring work into checklists.',
+    shortSummary: 'Store multi-step workflows once so any assistant runs the exact same format.',
+    deepNote:
+      'Chat silos force you to re-explain recurring workflows from scratch. A Markdown playbook captures exact steps and output tables so any assistant produces consistent results on demand.',
     sampleFile: 'playbooks/comparison-brief.md',
     sampleContent: `# Comparison Brief Playbook
 
@@ -256,12 +267,11 @@ export const BRAIN_FOLDERS = [
     id: 'execution-trail',
     name: 'execution trail',
     path: 'brain/execution-trail/',
-    tag: 'Clear history of what happened',
-    headline: 'A simple receipt for every action taken.',
-    sentences: [
-      'When work happens across scattered chat apps, you lose track of which assistant changed what and why.',
-      'One readable Markdown trail records every update in plain text, giving you full visibility and an easy undo path with zero vendor lock-in.'
-    ],
+    tag: 'Append-only receipts',
+    headline: 'One plain-text receipt per action.',
+    shortSummary: 'Know which assistant changed what, when, and why—with zero vendor lock-in.',
+    deepNote:
+      'When work happens across scattered chat apps, you lose visibility into changes. One append-only trail records every update in plain text for instant auditability and easy rollback.',
     sampleFile: 'execution-trail/recent.md',
     sampleContent: `# Execution Trail
 
@@ -270,3 +280,52 @@ export const BRAIN_FOLDERS = [
 - 23:00 | Codex       | Saved hosting comparison brief`
   }
 ];
+
+export const BLUEPRINT_OPTIONS = {
+  channels: [
+    {
+      id: 'telegram',
+      label: 'Telegram',
+      detail: 'Mobile commands, digests & one-tap approvals'
+    },
+    {
+      id: 'whatsapp',
+      label: 'WhatsApp',
+      detail: 'Personal notes, voice capture & family bridge'
+    }
+  ],
+  storage: [
+    {
+      id: 'drive',
+      label: 'Google Drive',
+      detail: 'Single sync bus across laptop and cloud'
+    },
+    {
+      id: 'git',
+      label: 'Git Repository',
+      detail: 'Versioned Markdown with full diff history'
+    },
+    {
+      id: 'hybrid',
+      label: 'Drive + Git',
+      detail: 'Live Drive sync backed by Git snapshots'
+    }
+  ],
+  models: [
+    {
+      id: 'antigravity',
+      label: 'Antigravity',
+      detail: 'Primary interactive workspace driver'
+    },
+    {
+      id: 'claude',
+      label: 'Claude',
+      detail: 'Writing, planning & careful reasoning'
+    },
+    {
+      id: 'codex',
+      label: 'Codex',
+      detail: 'Background builds & overnight verification'
+    }
+  ]
+};

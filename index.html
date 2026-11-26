@@ -6,14 +6,14 @@
     <title>Digital Brain Architecture — Mohammed KM</title>
     <meta
       name="description"
-      content="Digital Brain Architecture by Mohammed KM: one portable Markdown memory shared across Antigravity, Claude, and Codex with automatic failover and a human approval gate."
+      content="Digital Brain Architecture by Mohammed KM: interactive packet-routing visualizer, model failover switch, and custom AGENTS.md + config.json starter-kit exporter."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://brain.mohammed-km.in/" />
     <meta property="og:title" content="Digital Brain Architecture — Mohammed KM" />
     <meta
       property="og:description"
-      content="One shared folder of plain Markdown notes read by three AI assistants, with automatic failover and a human approval gate for outward actions."
+      content="One shared folder of plain Markdown notes read by three AI assistants, with animated packet routing, automatic failover, and a custom starter-kit exporter."
     />
     <meta property="og:image" content="https://brain.mohammed-km.in/og-card.png" />
     <meta property="og:image:width" content="1200" />
@@ -23,18 +23,18 @@
     <meta name="twitter:title" content="Digital Brain Architecture — Mohammed KM" />
     <meta
       name="twitter:description"
-      content="One shared folder of plain Markdown notes read by three AI assistants, with automatic failover and a human approval gate."
+      content="One shared folder of plain Markdown notes read by three AI assistants, with animated packet routing, automatic failover, and a custom starter-kit exporter."
     />
     <meta name="twitter:image" content="https://brain.mohammed-km.in/og-card.png" />
     <link
       rel="icon"
       type="image/svg+xml"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0d12'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia,serif' font-size='18' fill='%23d99b43'%3EB%3C/text%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23ffffff' stroke='%231e40af' stroke-width='2'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia,serif' font-size='18' font-weight='700' fill='%23111111'%3EB%3C/text%3E%3C/svg%3E"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Caudex:wght@400;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/src/styles/main.css" />
@@ -45,6 +45,7 @@
     <header class="site-header">
       <div class="container header-inner">
         <a href="#top" class="brand">
+          <span class="brand-mark" aria-hidden="true">B</span>
           <span class="brand-title">Digital Brain Architecture</span>
         </a>
 
@@ -75,70 +76,75 @@
         </button>
 
         <nav class="site-nav" id="site-nav" aria-label="Primary sections">
-          <a href="#command-sim">Command Simulator</a>
+          <a href="#packet-router">Packet Router</a>
+          <a href="#blueprint-generator">Starter-Kit Builder</a>
           <a href="#failover">Failover Switch</a>
-          <a href="#explorer">Inside the Brain</a>
+          <a href="#explorer">5 Folders</a>
         </nav>
       </div>
     </header>
 
     <main id="top">
-      <!-- HERO: GRASPABLE IN 10 SECONDS -->
+      <!-- COMPACT EDITORIAL HERO -->
       <section class="hero section">
         <div class="container">
           <div class="eyebrow">
             <span>MOHAMMED KM</span>
             <span class="sep" aria-hidden="true">/</span>
-            <span>DIGITAL BRAIN SANDBOX</span>
+            <span>DIGITAL BRAIN BLUEPRINT</span>
           </div>
 
           <h1 class="hero-title">Digital Brain Architecture</h1>
           <p class="hero-thesis">
-            One shared folder of plain Markdown notes that three AI assistants read together &mdash; so you never repeat yourself, never stall when a model goes down, and never let an AI send anything outside without your approval.
+            One plain Markdown folder shared across Antigravity, Claude, and Codex&mdash;watch live packets route across your devices, test model failover, and export your own starter kit.
           </p>
 
-          <div class="hero-actions">
-            <a href="#command-sim" class="btn btn-primary">Send a Command</a>
-            <a href="#failover" class="btn btn-secondary">Break a Model</a>
-            <a href="#explorer" class="btn btn-secondary">Explore the 5 Folders</a>
+          <div class="hero-bar">
+            <div class="hero-actions">
+              <a href="#packet-router" class="btn btn-primary">Simulate Packet Route</a>
+              <a href="#blueprint-generator" class="btn btn-secondary">Export Starter Kit</a>
+            </div>
+            <div class="hero-metrics" aria-label="Architecture summary metrics">
+              <span class="metric-chip"><strong>5</strong> Hops</span>
+              <span class="metric-chip"><strong>3</strong> Models</span>
+              <span class="metric-chip"><strong>$0</strong> Extra API</span>
+              <span class="metric-chip"><strong>100%</strong> Client-Side</span>
+            </div>
           </div>
 
-          <div class="pillars-grid" role="list" aria-label="Three core ideas">
-            <article class="pillar-card" role="listitem">
-              <div class="pillar-kicker">01 &middot; PORTABLE MEMORY</div>
-              <h2 class="pillar-title">Plain files, not chat silos</h2>
-              <p class="pillar-desc">
-                Your preferences, lessons, and checklists live as readable Markdown files you own forever.
-              </p>
-            </article>
-            <article class="pillar-card" role="listitem">
-              <div class="pillar-kicker">02 &middot; AUTOMATIC BACKUP</div>
-              <h2 class="pillar-title">Switch models with zero friction</h2>
-              <p class="pillar-desc">
-                Antigravity, Claude, and Codex share the exact same brain. If one is offline, the next takes over.
-              </p>
-            </article>
-            <article class="pillar-card" role="listitem">
-              <div class="pillar-kicker">03 &middot; HUMAN SAFETY GATE</div>
-              <h2 class="pillar-title">Private work runs; outward sends pause</h2>
-              <p class="pillar-desc">
-                Notes and lookups finish automatically. Sending an email always stops and waits for your tap.
-              </p>
-            </article>
-          </div>
+          <details class="editorial-drawer hero-drawer">
+            <summary>Three design principles behind this architecture</summary>
+            <div class="drawer-body pillars-grid">
+              <article class="pillar-item">
+                <div class="pillar-kicker">01 &middot; PORTABLE MEMORY</div>
+                <h2 class="pillar-title">Plain files, not chat silos</h2>
+                <p>Preferences, lessons, and checklists live as readable Markdown files you own forever.</p>
+              </article>
+              <article class="pillar-item">
+                <div class="pillar-kicker">02 &middot; AUTOMATIC BACKUP</div>
+                <h2 class="pillar-title">Switch models with zero friction</h2>
+                <p>Antigravity, Claude, and Codex read the same folder. If one is offline, the next takes over.</p>
+              </article>
+              <article class="pillar-item">
+                <div class="pillar-kicker">03 &middot; HUMAN SAFETY GATE</div>
+                <h2 class="pillar-title">Private work runs; outward sends pause</h2>
+                <p>Notes and lookups finish automatically. External emails always pause for your explicit tap.</p>
+              </article>
+            </div>
+          </details>
         </div>
       </section>
 
-      <!-- SANDBOX 1: SEND A COMMAND THROUGH THE BRAIN -->
-      <section id="command-sim" class="section section-bordered">
+      <!-- VISUAL 1: ANIMATED CLICKABLE PACKET-ROUTING WORKBENCH -->
+      <section id="packet-router" class="section section-bordered">
         <div class="container">
           <div class="section-head">
             <div>
-              <div class="section-kicker">SANDBOX 01 &mdash; LIVE TRACE</div>
-              <h2 class="section-title">Send a Command Through the Brain</h2>
+              <div class="section-kicker">SIMULATION 01 &mdash; LIVE PACKET ROUTER</div>
+              <h2 class="section-title">Laptop &rarr; Drive Bus &rarr; Cloud &rarr; Telegram &rarr; Approval Gate</h2>
             </div>
             <p class="section-desc">
-              Pick any everyday request below to watch a 4-step trace: how the brain finds the right note, chooses an assistant, checks the safety gate, and finishes the job.
+              Pick a request to launch an animated packet across all five hops, or click any node to inspect what happens there.
             </p>
           </div>
 
@@ -146,36 +152,186 @@
             <!-- Populated by src/main.js -->
           </div>
 
-          <div class="trace-card" id="trace-card" aria-live="polite">
-            <div class="trace-input-bar">
-              <div class="trace-input-content">
-                <span class="step-pill pill-neutral">INPUT</span>
+          <div class="router-workbench" id="router-workbench">
+            <div class="router-toolbar">
+              <div class="router-prompt-wrap">
+                <span class="step-pill pill-accent" id="packet-tag-pill">OUTWARD DRAFT</span>
                 <p class="trace-prompt" id="trace-prompt"></p>
               </div>
-              <button type="button" class="btn-ghost" id="replay-trace-btn">Replay trace</button>
+              <div class="router-controls">
+                <label class="speed-control" for="packet-speed">
+                  <span class="speed-label">Speed</span>
+                  <input type="range" id="packet-speed" min="0.5" max="2" step="0.5" value="1" />
+                  <span class="speed-value" id="packet-speed-value">1.0x</span>
+                </label>
+                <button type="button" class="btn-ghost" id="replay-trace-btn">Replay Packet</button>
+              </div>
             </div>
 
-            <ol class="trace-steps" id="trace-steps" aria-label="Four step execution trace">
-              <!-- Populated by src/main.js -->
-            </ol>
+            <!-- CENTERPIECE ANIMATED CLICKABLE SVG PIPELINE -->
+            <div class="svg-stage" aria-label="Interactive five-hop packet routing diagram">
+              <svg
+                id="packet-svg"
+                class="packet-svg"
+                viewBox="0 0 912 224"
+                role="img"
+                aria-label="Animated packet routing from Laptop to Drive Bus, Cloud, Telegram, and Approval Gate"
+              >
+                <defs>
+                  <pattern id="paper-grid" width="24" height="24" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="0.9" fill="#d9d9d5" />
+                  </pattern>
+                </defs>
+                <rect x="0" y="0" width="912" height="224" fill="url(#paper-grid)" rx="8" />
+                <g id="svg-edges"></g>
+                <g id="svg-nodes"></g>
+                <g id="svg-packet" aria-hidden="true"></g>
+              </svg>
+            </div>
 
+            <!-- LIVE TELEMETRY STRIP -->
+            <div class="telemetry-strip" id="telemetry-strip" aria-live="polite">
+              <!-- Populated by src/main.js -->
+            </div>
+
+            <!-- INTERACTIVE APPROVAL GATE BAR (SHOWN WHEN PAUSED AT GATE) -->
             <div class="approval-drawer" id="approval-drawer" hidden>
-              <!-- Populated when Safety Approval Gate pauses -->
+              <!-- Populated by src/main.js -->
+            </div>
+
+            <!-- CLICKED NODE INSPECTOR -->
+            <div class="node-inspector" id="node-inspector" aria-live="polite">
+              <!-- Populated by src/main.js -->
             </div>
           </div>
         </div>
       </section>
 
-      <!-- SANDBOX 2: BREAK A MODEL FAILOVER SWITCH -->
+      <!-- VISUAL 2: CUSTOM BLUEPRINT GENERATOR & STARTER-KIT EXPORTER -->
+      <section id="blueprint-generator" class="section section-bordered">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">TOOL 02 &mdash; CUSTOM BLUEPRINT EXPORTER</div>
+              <h2 class="section-title">Build &amp; Export Your Starter Kit</h2>
+            </div>
+            <p class="section-desc">
+              Choose your channels, storage bus, and models to generate a tailored <code>AGENTS.md</code> and <code>config.json</code> bundle&mdash;100% locally in your browser.
+            </p>
+          </div>
+
+          <div class="builder-grid">
+            <!-- LEFT: CONTROLS -->
+            <div class="builder-controls" id="builder-controls">
+              <div class="control-group">
+                <label class="control-label" for="owner-name-input">Owner Name</label>
+                <input
+                  type="text"
+                  id="owner-name-input"
+                  class="text-input"
+                  value="Alex"
+                  maxlength="40"
+                  placeholder="Your name"
+                />
+              </div>
+
+              <div class="control-group">
+                <div class="control-label">Channels <span class="control-hint">(pick one or both)</span></div>
+                <div class="chip-grid" id="channel-options" role="group" aria-label="Select channels"></div>
+              </div>
+
+              <div class="control-group">
+                <div class="control-label">Storage Bus <span class="control-hint">(single source of truth)</span></div>
+                <div class="chip-grid" id="storage-options" role="radiogroup" aria-label="Select storage bus"></div>
+              </div>
+
+              <div class="control-group">
+                <div class="control-label">Models <span class="control-hint">(failover priority order)</span></div>
+                <div class="chip-grid" id="model-options" role="group" aria-label="Select models"></div>
+              </div>
+
+              <div class="control-group control-inline">
+                <div>
+                  <div class="control-label">Human Approval Gate</div>
+                  <p class="control-sub">Pause external emails, messages &amp; payments for your tap.</p>
+                </div>
+                <button
+                  type="button"
+                  class="switch-btn"
+                  id="gate-toggle-btn"
+                  role="switch"
+                  aria-checked="true"
+                  aria-label="Toggle Human Approval Gate"
+                >
+                  <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+                  <span id="gate-toggle-label">Enabled</span>
+                </button>
+              </div>
+
+              <div class="topology-ribbon" id="builder-topology" aria-live="polite">
+                <!-- Live generated pipeline preview -->
+              </div>
+
+              <div class="export-actions">
+                <button type="button" class="btn btn-primary" id="download-zip-btn">
+                  Download Starter Bundle (.zip)
+                </button>
+                <button type="button" class="btn btn-secondary" id="download-agents-btn">
+                  AGENTS.md
+                </button>
+                <button type="button" class="btn btn-secondary" id="download-config-btn">
+                  config.json
+                </button>
+              </div>
+              <div class="export-feedback" id="export-feedback" aria-live="polite"></div>
+            </div>
+
+            <!-- RIGHT: LIVE CODE PREVIEW -->
+            <div class="builder-preview">
+              <div class="preview-header">
+                <div class="preview-tabs" role="tablist" aria-label="Starter kit files">
+                  <button type="button" class="preview-tab is-active" role="tab" aria-selected="true" data-preview-tab="agents">
+                    AGENTS.md
+                  </button>
+                  <button type="button" class="preview-tab" role="tab" aria-selected="false" data-preview-tab="config">
+                    config.json
+                  </button>
+                  <button type="button" class="preview-tab" role="tab" aria-selected="false" data-preview-tab="memory">
+                    memory/main.md
+                  </button>
+                </div>
+                <div class="preview-meta">
+                  <span class="preview-stats" id="preview-stats">0 lines</span>
+                  <button type="button" class="btn-mini" id="copy-preview-btn">Copy</button>
+                </div>
+              </div>
+              <pre class="preview-code"><code id="preview-code-content"></code></pre>
+
+              <details class="editorial-drawer preview-drawer">
+                <summary>How to use this starter kit in 3 minutes</summary>
+                <div class="drawer-body">
+                  <ol class="compact-steps">
+                    <li>Unzip <code>digital-brain-starter-kit.zip</code> into your chosen Drive or Git folder.</li>
+                    <li>Point your AI harnesses to read <code>AGENTS.md</code> and <code>memory/main.md</code> on startup.</li>
+                    <li>Add your first personal card inside <code>memory-cards/</code> and test one private note update.</li>
+                  </ol>
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISUAL 3: BREAK A MODEL FAILOVER SWITCH -->
       <section id="failover" class="section section-bordered">
         <div class="container">
           <div class="section-head">
             <div>
-              <div class="section-kicker">SANDBOX 02 &mdash; ZERO DOWNTIME</div>
+              <div class="section-kicker">SIMULATION 02 &mdash; ZERO DOWNTIME</div>
               <h2 class="section-title">Break a Model</h2>
             </div>
             <p class="section-desc">
-              Toggle Antigravity, Claude, or Codex off to watch the waterfall reroute cleanly. Because every assistant reads the same Markdown folder on flat-rate plans, your memory stays intact and your extra API bill stays at $0.
+              Switch providers offline to watch the waterfall reroute live&mdash;both here and inside the Packet Router above.
             </p>
           </div>
 
@@ -189,25 +345,34 @@
 
           <div class="failover-empty-banner" id="failover-empty-banner" hidden>
             <p class="failover-empty-text">
-              All three assistants are switched off. Your Markdown notes remain safely saved on disk with zero data lost and $0 spent, ready the moment any provider returns.
+              All three assistants are switched off. Your Markdown notes stay safe on disk with $0 spent until any provider returns.
             </p>
             <button type="button" class="btn btn-primary" id="restore-providers-btn">
               Restore All Providers
             </button>
           </div>
+
+          <details class="editorial-drawer section-drawer">
+            <summary>Why flat-rate failover avoids surprise API bills</summary>
+            <div class="drawer-body">
+              <p>
+                Because every assistant reads the exact same plain Markdown folder, switching from Antigravity to Claude or Codex requires zero migration or re-prompting. Staying on existing flat-rate plans guarantees extra metered API spend stays at $0 even during provider outages.
+              </p>
+            </div>
+          </details>
         </div>
       </section>
 
-      <!-- SANDBOX 3: INSIDE THE BRAIN 5-FOLDER EXPLORER -->
+      <!-- VISUAL 4: INSIDE THE BRAIN 5-FOLDER EXPLORER -->
       <section id="explorer" class="section section-bordered">
         <div class="container">
           <div class="section-head">
             <div>
-              <div class="section-kicker">SANDBOX 03 &mdash; PORTABLE STRUCTURE</div>
-              <h2 class="section-title">Inside the Brain</h2>
+              <div class="section-kicker">REFERENCE 03 &mdash; PORTABLE STRUCTURE</div>
+              <h2 class="section-title">Inside the 5 Folders</h2>
             </div>
             <p class="section-desc">
-              The entire brain fits into five plain-English folders. Click any folder to see why simple Markdown files outlast locked-in chat histories.
+              Click any folder to inspect its live Markdown file.
             </p>
           </div>
 
@@ -229,11 +394,13 @@
         <div>
           <div class="footer-title">Digital Brain Architecture &mdash; Mohammed KM</div>
           <p class="footer-note">
-            100% client-side interactive showcase using synthetic examples. Zero runtime tokens and zero personal data.
+            100% client-side interactive showcase using synthetic examples. Zero runtime APIs, zero tokens, zero personal data.
           </p>
         </div>
         <div class="footer-meta">
-          <a href="https://voice.mohammed-km.in" target="_blank" rel="noopener noreferrer">Voice Desk (voice.mohammed-km.in)</a>
+          <a href="https://mohammed-km.in" target="_blank" rel="noopener noreferrer">mohammed-km.in</a>
+          <span class="sep" aria-hidden="true">/</span>
+          <a href="https://voice.mohammed-km.in" target="_blank" rel="noopener noreferrer">Voice Desk</a>
           <span class="sep" aria-hidden="true">/</span>
           <a href="#top">Back to top</a>
         </div>
