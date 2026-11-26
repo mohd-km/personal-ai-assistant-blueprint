@@ -19,7 +19,7 @@ export const COMMAND_SCENARIOS = [
         detail: 'Opens memory-cards/travel.md (18 lines)'
       },
       harness: {
-        title: 'Harness Selection',
+        title: 'Assistant Selection',
         badge: 'FAST LANE',
         summary: 'Picks the first available assistant in your waterfall to make a clean, one-line update.',
         detail: 'Uses active flat-rate assistant — zero extra API cost'
@@ -53,7 +53,7 @@ export const COMMAND_SCENARIOS = [
         detail: 'Reads calendar + rules/focus-hours.md'
       },
       harness: {
-        title: 'Harness Selection',
+        title: 'Assistant Selection',
         badge: 'INSTANT ANSWER',
         summary: 'Routes to your active assistant for a fast, plain-English summary with open slots highlighted.',
         detail: 'Uses active flat-rate assistant — zero extra API cost'
@@ -80,7 +80,7 @@ export const COMMAND_SCENARIOS = [
     preferredHarness: 'Claude',
     needsApproval: true,
     draftPreview: {
-      to: 'Alex — Studio North (sample contact)',
+      to: 'Alex — Studio North (synthetic contact)',
       subject: 'Updated timeline + Thursday 3 PM check-in',
       body: 'Hi Alex, sharing the updated two-week milestones below. Does Thursday at 3 PM still work to walk through them?'
     },
@@ -92,7 +92,7 @@ export const COMMAND_SCENARIOS = [
         detail: 'Reads rules/writing-tone.md + memory-cards/studio-north.md'
       },
       harness: {
-        title: 'Harness Selection',
+        title: 'Assistant Selection',
         badge: 'WRITING LANE',
         summary: 'Assigns the draft to your active assistant, keeping the tone calm, concise, and free of filler.',
         detail: 'Drafted locally — nothing sent yet'
@@ -132,7 +132,7 @@ export const COMMAND_SCENARIOS = [
         detail: 'Reads playbooks/comparison-brief.md + lessons-learned/hosting.md'
       },
       harness: {
-        title: 'Harness Selection',
+        title: 'Assistant Selection',
         badge: 'DEEP WORK LANE',
         summary: 'Hands the long-running job to your always-on background assistant while your laptop sleeps.',
         detail: 'Runs on flat-rate plan — zero surprise bills'
@@ -168,7 +168,7 @@ export const FAILOVER_PROVIDERS = [
     name: 'Claude',
     role: 'First automatic backup',
     plan: 'Flat-rate plan',
-    strength: 'Steps in seamlessly for writing, planning, and careful reasoning.'
+    strength: 'Steps in automatically for writing, planning, and careful reasoning.'
   },
   {
     id: 'codex',

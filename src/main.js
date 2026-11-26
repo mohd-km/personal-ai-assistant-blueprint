@@ -302,7 +302,7 @@ function renderFailover() {
           active
             ? active.priority === 1
               ? 'Primary assistant is handling requests normally.'
-              : `Seamless failover active — ${active.name} took over with zero downtime.`
+              : `Failover active — ${active.name} took over with no interruption.`
             : 'All providers are toggled off right now.'
         }
       </p>
