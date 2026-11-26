@@ -6,7 +6,7 @@
     <title>Digital Brain Architecture — Mohammed KM</title>
     <meta
       name="description"
-      content="A sovereign, cross-harness digital brain running 24/7 on a single Linux node: persistent Markdown memory, Drive-as-bus sync across Antigravity, Claude, and Codex, multi-model CLI failover, unattended approval gate, and a 2-second cloned-voice phone interface."
+      content="A simple, calm, playable showcase of Digital Brain Architecture by Mohammed KM: one portable Markdown memory shared across Antigravity, Claude, and Codex with automatic failover and a human approval gate."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -25,6 +25,7 @@
           <span class="brand-mark" aria-hidden="true"></span>
           <span class="brand-title">Digital Brain Architecture</span>
         </a>
+
         <button
           type="button"
           class="nav-toggle"
@@ -34,307 +35,168 @@
           aria-label="Toggle navigation menu"
         >
           <span class="nav-toggle-label">Menu</span>
-          <svg class="nav-toggle-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <svg
+            class="nav-toggle-icon"
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
             <line x1="4" y1="7" x2="20" y2="7" />
             <line x1="4" y1="12" x2="20" y2="12" />
             <line x1="4" y1="17" x2="20" y2="17" />
           </svg>
         </button>
+
         <nav class="site-nav" id="site-nav" aria-label="Primary sections">
-          <a href="#voice-demo">Voice Desk</a>
-          <a href="#architecture">Architecture</a>
-          <a href="#simulator">Permissions</a>
-          <a href="#economics">Cost Discipline</a>
-          <a href="#starter">Starter Kit</a>
+          <a href="#command-sim">Command Simulator</a>
+          <a href="#failover">Failover Switch</a>
+          <a href="#explorer">Inside the Brain</a>
         </nav>
       </div>
     </header>
 
     <main id="top">
-      <!-- 1. HERO -->
+      <!-- HERO: GRASPABLE IN 10 SECONDS -->
       <section class="hero section">
         <div class="container">
           <div class="eyebrow">
-            <span>ARCHITECTURE MONOGRAPH</span>
-            <span class="sep" aria-hidden="true">/</span>
-            <span>V2</span>
+            <span>INTERACTIVE SHOWCASE</span>
             <span class="sep" aria-hidden="true">/</span>
             <span>MOHAMMED KM</span>
           </div>
+
           <h1 class="hero-title">Digital Brain Architecture</h1>
           <p class="hero-thesis">
-            A sovereign, cross-harness digital brain running 24/7 on a single Linux node &mdash; zero hardware lock-in, zero metered API drift.
-          </p>
-          <p class="hero-sub">
-            Persistent plain-text Markdown memory synced over a single Drive bus across Antigravity, Claude, and Codex,
-            paired with multi-model CLI failover, an unattended Telegram approval gate, and a 2-second cloned-voice phone
-            interface with deterministic two-lane isolation.
+            One shared folder of plain Markdown notes that three AI assistants read together &mdash; so you never repeat yourself, never stall when a model goes down, and never let an AI send anything outside without your approval.
           </p>
 
           <div class="hero-actions">
-            <a href="#voice-demo" class="btn btn-primary">Listen to Cloned Voice Desk</a>
-            <a href="#architecture" class="btn btn-secondary">Inspect Architecture</a>
-            <a href="#simulator" class="btn btn-secondary">Run Permission Simulator</a>
+            <a href="#command-sim" class="btn btn-primary">Send a Command</a>
+            <a href="#failover" class="btn btn-secondary">Break a Model</a>
+            <a href="#explorer" class="btn btn-secondary">Explore the 5 Folders</a>
           </div>
 
-          <div class="metrics-strip" role="list" aria-label="Production metrics">
-            <article class="metric-card" role="listitem">
-              <div class="metric-value accent-amber">2.0s</div>
-              <div class="metric-label">Cloned-Voice Recall</div>
-              <p class="metric-detail">
-                Fast-path local Markdown recall and native 8&nbsp;kHz telephony before invoking multi-model CLI failover.
+          <div class="pillars-grid" role="list" aria-label="Three core ideas">
+            <article class="pillar-card" role="listitem">
+              <div class="pillar-kicker">01 &middot; PORTABLE MEMORY</div>
+              <h2 class="pillar-title">Plain files, not chat silos</h2>
+              <p class="pillar-desc">
+                Your preferences, lessons, and checklists live as readable Markdown files you own forever.
               </p>
             </article>
-            <article class="metric-card" role="listitem">
-              <div class="metric-value accent-emerald">3 Harnesses</div>
-              <div class="metric-label">Drive-as-Bus Sync</div>
-              <p class="metric-detail">
-                One persistent Markdown brain shared live across Antigravity, Claude, and Codex with zero vendor lock-in.
+            <article class="pillar-card" role="listitem">
+              <div class="pillar-kicker">02 &middot; AUTOMATIC BACKUP</div>
+              <h2 class="pillar-title">Switch models with zero friction</h2>
+              <p class="pillar-desc">
+                Antigravity, Claude, and Codex share the exact same brain. If one is offline, the next takes over.
               </p>
             </article>
-            <article class="metric-card" role="listitem">
-              <div class="metric-value">1 Node</div>
-              <div class="metric-label">24/7 Linux Runtime</div>
-              <p class="metric-detail">
-                Always-on single Linux host running voice, messaging, and failover CLIs at 0 INR extra cloud hosting.
-              </p>
-            </article>
-            <article class="metric-card" role="listitem">
-              <div class="metric-value accent-emerald">2-Lane + Gate</div>
-              <div class="metric-label">Isolation &amp; Approval</div>
-              <p class="metric-detail">
-                Hard Caller-ID boundary separating Owner execution from a zero-tool Public Desk, plus a Telegram approval gate.
+            <article class="pillar-card" role="listitem">
+              <div class="pillar-kicker">03 &middot; HUMAN SAFETY GATE</div>
+              <h2 class="pillar-title">Private work runs; outward sends pause</h2>
+              <p class="pillar-desc">
+                Notes and lookups finish automatically. Sending an email always stops and waits for your tap.
               </p>
             </article>
           </div>
         </div>
       </section>
 
-      <!-- 1B. CLONED VOICE DESK AUDIO DEMO -->
-      <section id="voice-demo" class="voice-demo-section">
+      <!-- SANDBOX 1: SEND A COMMAND THROUGH THE BRAIN -->
+      <section id="command-sim" class="section section-bordered">
         <div class="container">
-          <div class="voice-player-card" id="voice-player-card">
-            <div class="voice-player-head">
-              <div>
-                <div class="mono-label">LIVE TELEPHONY SAMPLE &middot; PUBLIC DESK LANE</div>
-                <h2 class="voice-player-title">Listen to the Cloned Voice Desk</h2>
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">SANDBOX 01 &mdash; LIVE TRACE</div>
+              <h2 class="section-title">Send a Command Through the Brain</h2>
+            </div>
+            <p class="section-desc">
+              Pick any everyday request below to watch a 4-step trace: how the brain finds the right note, chooses an assistant, checks the safety gate, and finishes the job.
+            </p>
+          </div>
+
+          <div class="command-grid" id="command-buttons" role="group" aria-label="Choose a sample command">
+            <!-- Populated by src/main.js -->
+          </div>
+
+          <div class="trace-card" id="trace-card" aria-live="polite">
+            <div class="trace-input-bar">
+              <div class="trace-input-content">
+                <span class="step-pill pill-neutral">INPUT</span>
+                <p class="trace-prompt" id="trace-prompt"></p>
               </div>
-              <div class="voice-status-group">
-                <div class="voice-wave" aria-hidden="true">
-                  <span></span><span></span><span></span><span></span><span></span>
-                </div>
-                <span class="voice-status-pill" id="voice-status-badge">READY</span>
-              </div>
+              <button type="button" class="btn-ghost" id="replay-trace-btn">Replay trace</button>
             </div>
 
-            <div class="voice-controls-row">
-              <button
-                type="button"
-                class="voice-play-btn"
-                id="voice-play-btn"
-                aria-label="Play cloned voice desk greeting"
-                aria-pressed="false"
-              >
-                <svg class="icon-play" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
-                  <path d="M8 5.14v13.72a1 1 0 0 0 1.52.85l11.02-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z" />
-                </svg>
-                <svg class="icon-pause" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">
-                  <rect x="6" y="4.5" width="4.2" height="15" rx="1" />
-                  <rect x="13.8" y="4.5" width="4.2" height="15" rx="1" />
-                </svg>
-              </button>
+            <ol class="trace-steps" id="trace-steps" aria-label="Four step execution trace">
+              <!-- Populated by src/main.js -->
+            </ol>
 
-              <div class="voice-progress-area">
-                <div
-                  class="voice-progress-track"
-                  id="voice-progress-track"
-                  role="slider"
-                  tabindex="0"
-                  aria-label="Audio playback progress"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                  aria-valuenow="0"
-                >
-                  <div class="voice-progress-fill" id="voice-progress-fill"></div>
-                </div>
-                <div class="voice-time-row">
-                  <span class="mono-label" id="voice-time-current">0:00</span>
-                  <span class="mono-label" id="voice-time-duration">0:09</span>
-                </div>
-              </div>
+            <div class="approval-drawer" id="approval-drawer" hidden>
+              <!-- Populated when Safety Approval Gate pauses -->
             </div>
-
-            <div class="voice-transcript-box">
-              <div class="mono-label">GREETING TRANSCRIPT PREVIEW</div>
-              <p class="voice-transcript-text">
-                &ldquo;Hello? Yes, speaking for Mohammed&rsquo;s desk. He&rsquo;s tied up at the moment. Feel free to share your name and what the call is about, and I&rsquo;ll pass the note along to him right away.&rdquo;
-              </p>
-            </div>
-
-            <div class="voice-meta-footer">
-              <span class="voice-meta-dot" aria-hidden="true"></span>
-              <span class="voice-meta-label">
-                Synthesized live via ElevenLabs v4 Turbo on 8 kHz telephony &mdash; zero live phone number exposed
-              </span>
-            </div>
-
-            <audio id="voice-demo-audio" preload="metadata" src="./audio/voice-desk-demo.mp3"></audio>
           </div>
         </div>
       </section>
 
-      <!-- 2. INTERACTIVE ARCHITECTURE DIAGRAM -->
-      <section id="architecture" class="section section-bordered">
+      <!-- SANDBOX 2: BREAK A MODEL FAILOVER SWITCH -->
+      <section id="failover" class="section section-bordered">
         <div class="container">
           <div class="section-head">
             <div>
-              <div class="section-kicker">01 &mdash; SYSTEM TOPOLOGY</div>
-              <h2 class="section-title">Interactive Architecture Diagram</h2>
+              <div class="section-kicker">SANDBOX 02 &mdash; ZERO DOWNTIME</div>
+              <h2 class="section-title">Break a Model</h2>
             </div>
             <p class="section-desc">
-              Select any node on the single Linux host pipeline to inspect its engineering trade-offs, millisecond latency budget, Drive-as-bus sync path, and non-negotiable security invariant.
+              Toggle Antigravity, Claude, or Codex off to watch the waterfall reroute cleanly. Because every assistant reads the same Markdown folder on flat-rate plans, your memory stays intact and your extra API bill stays at $0.
             </p>
           </div>
 
-          <div class="path-controls" role="group" aria-label="Trace call path">
-            <button type="button" class="chip is-active" data-trace="all">Full Topology</button>
-            <button type="button" class="chip" data-trace="owner">Trace Owner Lane</button>
-            <button type="button" class="chip" data-trace="public">Trace Public Desk Lane</button>
+          <div class="failover-status-bar" id="failover-status-bar" aria-live="polite">
+            <!-- Populated by src/main.js -->
           </div>
 
-          <div class="arch-layout">
-            <div class="arch-canvas" id="arch-canvas" aria-label="Interactive architecture pipeline">
-              <!-- Rendered dynamically by src/main.js -->
-            </div>
+          <div class="failover-waterfall" id="failover-waterfall">
+            <!-- Populated by src/main.js -->
+          </div>
 
-            <aside class="inspector-panel" id="node-inspector" aria-live="polite">
-              <!-- Populated dynamically when a node is selected -->
-            </aside>
+          <div class="failover-empty-banner" id="failover-empty-banner" hidden>
+            <p class="failover-empty-text">
+              All three assistants are switched off. Your Markdown notes remain safely saved on disk with zero data lost and $0 spent, ready the moment any provider returns.
+            </p>
+            <button type="button" class="btn btn-primary" id="restore-providers-btn">
+              Restore All Providers
+            </button>
           </div>
         </div>
       </section>
 
-      <!-- 3. INTERACTIVE PUBLIC VS PRIVATE PERMISSION SIMULATOR -->
-      <section id="simulator" class="section section-bordered">
+      <!-- SANDBOX 3: INSIDE THE BRAIN 5-FOLDER EXPLORER -->
+      <section id="explorer" class="section section-bordered">
         <div class="container">
           <div class="section-head">
             <div>
-              <div class="section-kicker">02 &mdash; SECURITY BOUNDARY</div>
-              <h2 class="section-title">Public vs Private Permission Simulator</h2>
+              <div class="section-kicker">SANDBOX 03 &mdash; PORTABLE STRUCTURE</div>
+              <h2 class="section-title">Inside the Brain</h2>
             </div>
             <p class="section-desc">
-              Test how the deterministic Caller-ID router isolates identity before a single token is generated. Toggle caller profiles to verify allowed context, hard-blocked fields, and live transcripts.
+              The entire brain fits into five plain-English folders. Click any folder to see why simple Markdown files outlast locked-in chat histories.
             </p>
           </div>
 
-          <div class="sim-controls-row">
-            <div class="sim-tabs" id="caller-tabs" role="tablist" aria-label="Caller profile selector">
-              <!-- Rendered dynamically -->
-            </div>
-            <div class="sim-lang-wrap" id="lang-selector-wrap">
-              <!-- Shown for multilingual Public Desk callers -->
-            </div>
-          </div>
-
-          <div class="sim-grid" id="simulator-output" aria-live="polite">
-            <!-- Rendered dynamically -->
-          </div>
-        </div>
-      </section>
-
-      <!-- 4. COST & TOKEN DISCIPLINE TABLE -->
-      <section id="economics" class="section section-bordered">
-        <div class="container">
-          <div class="section-head">
-            <div>
-              <div class="section-kicker">03 &mdash; UNIT ECONOMICS</div>
-              <h2 class="section-title">Cost &amp; Token Discipline</h2>
-            </div>
-            <p class="section-desc">
-              Metered LLM APIs turn every voice turn and background retry into compounding spend. This sovereign stack pairs flat-rate CLI failover across Antigravity, Claude, and Codex with strict telephony and speech-synthesis guards.
-            </p>
-          </div>
-
-          <div class="estimator-card">
-            <div class="estimator-header">
-              <div>
-                <div class="mono-label">INTERACTIVE VOLUME ESTIMATOR</div>
-                <h3 class="card-heading">Monthly Run-Rate vs Metered API Stack</h3>
-              </div>
-              <div class="estimator-summary" id="estimator-summary">
-                <!-- Dynamic totals -->
-              </div>
-            </div>
-            <div class="estimator-sliders">
-              <label class="slider-field">
-                <span class="slider-meta">
-                  <span>Monthly Calls</span>
-                  <strong id="calls-val">60 calls</strong>
-                </span>
-                <input type="range" id="calls-slider" min="10" max="300" step="10" value="60" />
-              </label>
-              <label class="slider-field">
-                <span class="slider-meta">
-                  <span>Avg Call Duration</span>
-                  <strong id="minutes-val">2.0 min</strong>
-                </span>
-                <input type="range" id="minutes-slider" min="0.5" max="6" step="0.5" value="2" />
-              </label>
-            </div>
-          </div>
-
-          <div class="table-wrap">
-            <table class="cost-table">
-              <thead>
-                <tr>
-                  <th>Layer</th>
-                  <th>Digital Brain Implementation</th>
-                  <th>Cost Model</th>
-                  <th>Discipline &amp; Guardrails</th>
-                </tr>
-              </thead>
-              <tbody id="cost-table-body">
-                <!-- Rendered dynamically -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- 5. OPEN-SOURCE STARTER BLUEPRINT -->
-      <section id="starter" class="section section-bordered">
-        <div class="container">
-          <div class="section-head">
-            <div>
-              <div class="section-kicker">04 &mdash; REPRODUCIBLE SETUP</div>
-              <h2 class="section-title">Open-Source Starter Blueprint</h2>
-            </div>
-            <p class="section-desc">
-              A minimal, portable directory layout and five-step setup path for running your own single-node digital brain. Everything lives in readable Markdown and small Node/Python utilities &mdash; synced over Drive with no proprietary SaaS lock-in.
-            </p>
-          </div>
-
-          <div class="starter-grid">
-            <div class="tree-panel">
-              <div class="panel-bar">
-                <span class="mono-label">FOLDER ARCHITECTURE</span>
-                <span class="panel-hint">Click a file to inspect template</span>
-              </div>
-              <div class="file-tree" id="file-tree" role="tree" aria-label="Starter repository structure">
-                <!-- Rendered dynamically -->
-              </div>
-              <div class="code-preview">
-                <div class="code-preview-bar">
-                  <span class="mono-label" id="preview-filename">digital-brain/lanes/router.js</span>
-                  <button type="button" class="copy-btn" id="copy-preview-btn">Copy</button>
-                </div>
-                <pre><code id="preview-code"></code></pre>
-              </div>
+          <div class="explorer-layout">
+            <div class="folder-list" id="folder-list" role="tablist" aria-label="Five brain folders">
+              <!-- Populated by src/main.js -->
             </div>
 
-            <div class="steps-panel" id="setup-steps">
-              <!-- Rendered dynamically -->
-            </div>
+            <article class="folder-detail" id="folder-detail" role="tabpanel" aria-live="polite">
+              <!-- Populated by src/main.js -->
+            </article>
           </div>
         </div>
       </section>
@@ -343,15 +205,13 @@
     <footer class="site-footer">
       <div class="container footer-inner">
         <div>
-          <div class="footer-title">Digital Brain Architecture</div>
+          <div class="footer-title">Digital Brain Architecture &mdash; Mohammed KM</div>
           <p class="footer-note">
-            Authored by Mohammed KM. Sovereign cross-harness digital brain on a single 24/7 Linux node. All phone numbers, transcripts, and configurations shown are synthetic placeholders.
+            100% client-side interactive showcase using synthetic examples. Zero runtime tokens and zero personal data.
           </p>
         </div>
         <div class="footer-meta">
-          <span>Single Linux Node</span>
-          <span class="sep" aria-hidden="true">/</span>
-          <span>Drive-as-Bus Sync</span>
+          <a href="https://voice.mohammed-km.in" target="_blank" rel="noopener noreferrer">Voice Desk (voice.mohammed-km.in)</a>
           <span class="sep" aria-hidden="true">/</span>
           <a href="#top">Back to top</a>
         </div>

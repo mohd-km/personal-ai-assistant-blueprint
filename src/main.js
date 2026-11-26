@@ -1,705 +1,458 @@
 import {
-  ARCHITECTURE_NODES,
-  CALLER_SCENARIOS,
-  COST_ROWS,
-  STARTER_FILES,
-  SETUP_STEPS
+  COMMAND_SCENARIOS,
+  FAILOVER_PROVIDERS,
+  BRAIN_FOLDERS
 } from './data/blueprintData.js';
 
 const state = {
-  selectedNodeId: 'router',
-  activeTrace: 'all',
-  selectedCallerId: 'owner',
-  selectedLang: 'en',
-  monthlyCalls: 60,
-  avgMinutes: 2.0,
-  selectedFilePath: '  lanes/router.js'
+  activeCommandId: COMMAND_SCENARIOS[0].id,
+  traceStage: 0, // 0..4
+  approvalState: 'idle', // 'idle' | 'pending' | 'approved' | 'cancelled'
+  traceTimers: [],
+  providersOnline: {
+    antigravity: true,
+    claude: true,
+    codex: true
+  },
+  activeFolderId: BRAIN_FOLDERS[0].id
 };
 
-const LANG_LABELS = [
-  { code: 'en', label: 'EN' },
-  { code: 'ml', label: 'ML' },
-  { code: 'hi', label: 'HI' },
-  { code: 'kn', label: 'KN' },
-  { code: 'ta', label: 'TA' }
-];
+const prefersReducedMotion = () =>
+  window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-function escapeHtml(str) {
-  return String(str)
+function escapeHtml(value) {
+  return String(value)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
-function formatClock(seconds) {
-  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
-  const total = Math.floor(seconds);
-  const mins = Math.floor(total / 60);
-  const secs = total % 60;
-  return `${mins}:${String(secs).padStart(2, '0')}`;
+function getActiveProvider() {
+  return FAILOVER_PROVIDERS.find((p) => state.providersOnline[p.id]) || null;
 }
 
-/* -------------------------------------------
-   Mobile Navigation Toggle
-------------------------------------------- */
-function initMobileNav() {
-  const toggle = document.getElementById('nav-toggle');
-  const nav = document.getElementById('site-nav');
-  if (!toggle || !nav) return;
+/* ---------------- HEADER & PROGRESS ---------------- */
 
-  const setOpen = (open) => {
-    nav.classList.toggle('is-open', open);
-    toggle.setAttribute('aria-expanded', String(open));
-  };
+function initHeaderAndProgress() {
+  const progressBar = document.getElementById('reading-progress');
+  const navToggle = document.getElementById('nav-toggle');
+  const siteNav = document.getElementById('site-nav');
 
-  toggle.addEventListener('click', () => {
-    const isOpen = nav.classList.contains('is-open');
-    setOpen(!isOpen);
-  });
-
-  nav.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => setOpen(false));
-  });
-
-  window.addEventListener('resize', () => {
-    if (window.innerWidth > 768 && nav.classList.contains('is-open')) {
-      setOpen(false);
-    }
-  });
-}
-
-/* -------------------------------------------
-   Reading Progress Indicator
-------------------------------------------- */
-function initScrollProgress() {
-  const bar = document.getElementById('reading-progress');
-  if (!bar) return;
-
-  const update = () => {
-    const scrollTop = window.scrollY;
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const pct = docHeight > 0 ? Math.min(100, Math.max(0, (scrollTop / docHeight) * 100)) : 0;
-    bar.style.width = `${pct.toFixed(1)}%`;
-  };
-
-  window.addEventListener('scroll', update, { passive: true });
-  update();
-}
-
-/* -------------------------------------------
-   Section 1B: Cloned Voice Desk Audio Player
-------------------------------------------- */
-function initVoicePlayer() {
-  const audio = document.getElementById('voice-demo-audio');
-  const card = document.getElementById('voice-player-card');
-  const playBtn = document.getElementById('voice-play-btn');
-  const track = document.getElementById('voice-progress-track');
-  const fill = document.getElementById('voice-progress-fill');
-  const currentEl = document.getElementById('voice-time-current');
-  const durationEl = document.getElementById('voice-time-duration');
-  const statusEl = document.getElementById('voice-status-badge');
-
-  if (!audio || !card || !playBtn || !track || !fill || !currentEl || !durationEl || !statusEl) {
-    return;
-  }
-
-  let rafId = null;
-
-  const syncProgress = () => {
-    const dur = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
-    const cur = audio.currentTime || 0;
-    const pct = dur > 0 ? Math.min(100, Math.max(0, (cur / dur) * 100)) : 0;
-
-    fill.style.width = `${pct.toFixed(2)}%`;
-    track.setAttribute('aria-valuenow', String(Math.round(pct)));
-    currentEl.textContent = formatClock(cur);
-    if (dur > 0) {
-      durationEl.textContent = formatClock(dur);
+  const updateProgress = () => {
+    const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = scrollable > 0 ? Math.min(100, Math.max(0, (window.scrollY / scrollable) * 100)) : 0;
+    if (progressBar) {
+      progressBar.style.width = `${pct}%`;
     }
   };
 
-  const tick = () => {
-    syncProgress();
-    if (!audio.paused && !audio.ended) {
-      rafId = requestAnimationFrame(tick);
-    } else {
-      rafId = null;
-    }
-  };
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
 
-  const setPlayingUI = (playing, label) => {
-    card.classList.toggle('is-playing', playing);
-    playBtn.setAttribute('aria-pressed', String(playing));
-    playBtn.setAttribute(
-      'aria-label',
-      playing ? 'Pause cloned voice desk greeting' : 'Play cloned voice desk greeting'
-    );
-    statusEl.textContent = label || (playing ? 'PLAYING' : 'READY');
-  };
-
-  audio.addEventListener('loadedmetadata', () => {
-    if (Number.isFinite(audio.duration) && audio.duration > 0) {
-      durationEl.textContent = formatClock(audio.duration);
-    }
-    syncProgress();
-  });
-
-  audio.addEventListener('play', () => {
-    setPlayingUI(true, 'PLAYING');
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = requestAnimationFrame(tick);
-  });
-
-  audio.addEventListener('pause', () => {
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-      rafId = null;
-    }
-    const isAtStart = audio.currentTime <= 0.05;
-    setPlayingUI(false, isAtStart ? 'READY' : 'PAUSED');
-    syncProgress();
-  });
-
-  audio.addEventListener('ended', () => {
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-      rafId = null;
-    }
-    fill.style.width = '100%';
-    track.setAttribute('aria-valuenow', '100');
-    setPlayingUI(false, 'REPLAY');
-    setTimeout(() => {
-      if (audio.paused && audio.ended) {
-        audio.currentTime = 0;
-        syncProgress();
-        statusEl.textContent = 'READY';
-      }
-    }, 900);
-  });
-
-  audio.addEventListener('error', () => {
-    setPlayingUI(false, 'UNAVAILABLE');
-  });
-
-  playBtn.addEventListener('click', () => {
-    if (audio.paused) {
-      if (audio.ended) {
-        audio.currentTime = 0;
-      }
-      audio.play().catch(() => {
-        setPlayingUI(false, 'READY');
-      });
-    } else {
-      audio.pause();
-    }
-  });
-
-  const seekByFraction = (fraction) => {
-    const dur = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
-    if (!dur) return;
-    const clamped = Math.min(1, Math.max(0, fraction));
-    audio.currentTime = clamped * dur;
-    syncProgress();
-  };
-
-  track.addEventListener('click', (e) => {
-    const rect = track.getBoundingClientRect();
-    if (rect.width <= 0) return;
-    seekByFraction((e.clientX - rect.left) / rect.width);
-  });
-
-  track.addEventListener('keydown', (e) => {
-    const dur = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
-    if (!dur) return;
-    if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      seekByFraction((audio.currentTime + 1) / dur);
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      seekByFraction((audio.currentTime - 1) / dur);
-    } else if (e.key === ' ' || e.key === 'Enter') {
-      e.preventDefault();
-      playBtn.click();
-    }
-  });
-}
-
-/* -------------------------------------------
-   Section 2: Interactive Architecture Diagram
-------------------------------------------- */
-function isNodeActiveInTrace(node) {
-  if (state.activeTrace === 'all') return true;
-  if (node.lane === 'shared') return true;
-  return node.lane === state.activeTrace;
-}
-
-function renderNodeCard(node) {
-  const isSelected = state.selectedNodeId === node.id;
-  const isDimmed = !isNodeActiveInTrace(node);
-  const laneClass = node.lane === 'public' ? 'lane-public' : '';
-
-  const subListHtml = node.subItems
-    ? `<ul class="node-sublist">${node.subItems.map((item) => `<li>&mdash; ${escapeHtml(item)}</li>`).join('')}</ul>`
-    : '';
-
-  return `
-    <button
-      type="button"
-      class="arch-node ${laneClass} ${isSelected ? 'is-selected' : ''} ${isDimmed ? 'is-dimmed' : ''}"
-      data-node-id="${node.id}"
-      aria-pressed="${isSelected}"
-    >
-      <div class="node-top">
-        <span class="node-step">${escapeHtml(node.step)}</span>
-        <span class="node-badge ${node.badgeTone}">${escapeHtml(node.badge)}</span>
-      </div>
-      <h3 class="node-title">${escapeHtml(node.title)}</h3>
-      <p class="node-sub">${escapeHtml(node.shortSub)}</p>
-      ${subListHtml}
-    </button>
-  `;
-}
-
-function renderArchitecture() {
-  const canvas = document.getElementById('arch-canvas');
-  if (!canvas) return;
-
-  const plivo = ARCHITECTURE_NODES.find((n) => n.id === 'plivo');
-  const bridge = ARCHITECTURE_NODES.find((n) => n.id === 'bridge');
-  const router = ARCHITECTURE_NODES.find((n) => n.id === 'router');
-  const owner = ARCHITECTURE_NODES.find((n) => n.id === 'owner');
-  const pub = ARCHITECTURE_NODES.find((n) => n.id === 'public');
-
-  const ownerStroke = state.activeTrace === 'public' ? 'rgba(244,242,237,0.12)' : '#d99b43';
-  const publicStroke = state.activeTrace === 'owner' ? 'rgba(244,242,237,0.12)' : '#3fa67b';
-  const spineStroke = state.activeTrace === 'public' ? '#3fa67b' : '#d99b43';
-
-  canvas.innerHTML = `
-    <div class="arch-spine">
-      ${renderNodeCard(plivo)}
-      <svg class="arch-connector-svg" viewBox="0 0 200 34" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <line x1="100" y1="0" x2="100" y2="28" stroke="${spineStroke}" stroke-width="1.5" stroke-opacity="0.7" />
-        <polygon points="96,26 104,26 100,33" fill="${spineStroke}" fill-opacity="0.85" />
-      </svg>
-
-      ${renderNodeCard(bridge)}
-      <svg class="arch-connector-svg" viewBox="0 0 200 34" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <line x1="100" y1="0" x2="100" y2="28" stroke="${spineStroke}" stroke-width="1.5" stroke-opacity="0.7" />
-        <polygon points="96,26 104,26 100,33" fill="${spineStroke}" fill-opacity="0.85" />
-      </svg>
-
-      ${renderNodeCard(router)}
-      <svg class="arch-split-svg arch-split-desktop" viewBox="0 0 400 48" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <path d="M 200 0 L 200 20 L 100 20 L 100 42" fill="none" stroke="${ownerStroke}" stroke-width="1.5" />
-        <polygon points="96,40 104,40 100,47" fill="${ownerStroke}" />
-        <path d="M 200 0 L 200 20 L 300 20 L 300 42" fill="none" stroke="${publicStroke}" stroke-width="1.5" />
-        <polygon points="296,40 304,40 300,47" fill="${publicStroke}" />
-      </svg>
-      <svg class="arch-connector-svg arch-split-mobile" viewBox="0 0 200 34" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-        <line x1="100" y1="0" x2="100" y2="28" stroke="${spineStroke}" stroke-width="1.5" stroke-opacity="0.7" />
-        <polygon points="96,26 104,26 100,33" fill="${spineStroke}" fill-opacity="0.85" />
-      </svg>
-
-      <div class="arch-branches">
-        ${renderNodeCard(owner)}
-        ${renderNodeCard(pub)}
-      </div>
-    </div>
-  `;
-
-  canvas.querySelectorAll('[data-node-id]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.selectedNodeId = btn.dataset.nodeId;
-      renderArchitecture();
-      renderInspector();
+  if (navToggle && siteNav) {
+    navToggle.addEventListener('click', () => {
+      const open = siteNav.classList.toggle('is-open');
+      navToggle.setAttribute('aria-expanded', String(open));
     });
-  });
-}
 
-function renderInspector() {
-  const panel = document.getElementById('node-inspector');
-  if (!panel) return;
-
-  const node = ARCHITECTURE_NODES.find((n) => n.id === state.selectedNodeId) || ARCHITECTURE_NODES[0];
-
-  const barSegments = node.latencyBudget.segments
-    .map(
-      (seg) =>
-        `<div class="latency-seg" style="width:${seg.pct}%;background:${seg.color}" title="${escapeHtml(seg.label)}: ${seg.ms}ms"></div>`
-    )
-    .join('');
-
-  const legendRows = node.latencyBudget.segments
-    .map(
-      (seg) =>
-        `<div class="latency-row"><span>${escapeHtml(seg.label)}</span><span>${seg.ms} ms</span></div>`
-    )
-    .join('');
-
-  panel.innerHTML = `
-    <div class="inspector-header">
-      <div class="mono-label">${escapeHtml(node.step)} &middot; NODE SPECIFICATION</div>
-      <h3 class="inspector-title">${escapeHtml(node.title)}</h3>
-      <div class="inspector-proto">${escapeHtml(node.protocol)}</div>
-    </div>
-
-    <div class="inspector-block">
-      <h4>Engineering Trade-Offs</h4>
-      <ul class="inspector-list">
-        ${node.tradeoffs.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
-      </ul>
-    </div>
-
-    <div class="inspector-block">
-      <h4>Latency Budget &mdash; ${escapeHtml(node.latencyBudget.total)}</h4>
-      <div class="latency-bar-wrap">
-        <div class="latency-track">${barSegments}</div>
-        <div class="latency-legend">${legendRows}</div>
-      </div>
-    </div>
-
-    <div class="inspector-block">
-      <h4>Security Invariant</h4>
-      <div class="invariant-box ${node.invariantTone}">${escapeHtml(node.invariant)}</div>
-    </div>
-  `;
-}
-
-function initTraceChips() {
-  document.querySelectorAll('[data-trace]').forEach((chip) => {
-    chip.addEventListener('click', () => {
-      state.activeTrace = chip.dataset.trace;
-      document.querySelectorAll('[data-trace]').forEach((c) => c.classList.remove('is-active'));
-      chip.classList.add('is-active');
-
-      if (state.activeTrace === 'owner' && state.selectedNodeId === 'public') {
-        state.selectedNodeId = 'owner';
-      } else if (state.activeTrace === 'public' && state.selectedNodeId === 'owner') {
-        state.selectedNodeId = 'public';
-      }
-
-      renderArchitecture();
-      renderInspector();
-    });
-  });
-}
-
-/* -------------------------------------------
-   Section 3: Public vs Private Permission Simulator
-------------------------------------------- */
-function renderSimulator() {
-  const tabsEl = document.getElementById('caller-tabs');
-  const langWrap = document.getElementById('lang-selector-wrap');
-  const outEl = document.getElementById('simulator-output');
-  if (!tabsEl || !langWrap || !outEl) return;
-
-  const active = CALLER_SCENARIOS.find((c) => c.id === state.selectedCallerId) || CALLER_SCENARIOS[0];
-  if (!active.multilingual) {
-    state.selectedLang = 'en';
-  }
-
-  tabsEl.innerHTML = CALLER_SCENARIOS.map(
-    (scenario) => `
-      <button
-        type="button"
-        role="tab"
-        aria-selected="${scenario.id === active.id}"
-        class="sim-tab ${scenario.id === active.id ? 'is-active' : ''}"
-        data-caller-id="${scenario.id}"
-      >
-        <span class="dot ${scenario.tone}" aria-hidden="true"></span>
-        <span>${escapeHtml(scenario.label)}</span>
-      </button>
-    `
-  ).join('');
-
-  tabsEl.querySelectorAll('[data-caller-id]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.selectedCallerId = btn.dataset.callerId;
-      renderSimulator();
-    });
-  });
-
-  if (active.multilingual) {
-    langWrap.innerHTML = `
-      <span class="mono-label">PUBLIC DESK LANG</span>
-      ${LANG_LABELS.map(
-        (l) => `
-          <button
-            type="button"
-            class="lang-pill ${state.selectedLang === l.code ? 'is-active' : ''}"
-            data-lang="${l.code}"
-          >${l.label}</button>
-        `
-      ).join('')}
-    `;
-
-    langWrap.querySelectorAll('[data-lang]').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        state.selectedLang = btn.dataset.lang;
-        renderSimulator();
+    siteNav.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        siteNav.classList.remove('is-open');
+        navToggle.setAttribute('aria-expanded', 'false');
       });
     });
-  } else {
-    langWrap.innerHTML = `<span class="mono-label">LANGUAGE: ENGLISH (DEFAULT)</span>`;
   }
-
-  const transcript = active.transcripts[state.selectedLang] || active.transcripts.en;
-
-  outEl.innerHTML = `
-    <div class="sim-card">
-      <div class="lane-banner ${active.tone}">
-        <span class="lane-name">${escapeHtml(active.lane)}</span>
-        <span class="lane-caller-id">${escapeHtml(active.callerId)}</span>
-      </div>
-
-      <div class="sim-meta-grid">
-        <div class="sim-meta-box">
-          <div class="mono-label">EXECUTION POLICY</div>
-          <div class="sim-meta-val">${escapeHtml(active.executionPolicy)}</div>
-        </div>
-        <div class="sim-meta-box">
-          <div class="mono-label">VOICE TIME BUDGET</div>
-          <div class="sim-meta-val">${escapeHtml(active.maxVoiceBudget)}</div>
-        </div>
-      </div>
-
-      <div class="perm-columns">
-        <div class="perm-list-box allowed">
-          <div class="mono-label">ALLOWED DATA &amp; SCOPE</div>
-          <ul class="perm-list">
-            ${active.allowedData
-              .map(
-                (item) =>
-                  `<li><span class="perm-marker allow" aria-hidden="true">+</span><span>${escapeHtml(item)}</span></li>`
-              )
-              .join('')}
-          </ul>
-        </div>
-        <div class="perm-list-box blocked">
-          <div class="mono-label">HARD-BLOCKED FIELDS</div>
-          <ul class="perm-list">
-            ${active.blockedFields
-              .map(
-                (item) =>
-                  `<li><span class="perm-marker block" aria-hidden="true">x</span><span>${escapeHtml(item)}</span></li>`
-              )
-              .join('')}
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="sim-card">
-      <div class="transcript-head">
-        <div>
-          <div class="mono-label">SIMULATED CALL TRANSCRIPT</div>
-        </div>
-        <div class="mono-label">${active.id === 'owner' ? 'OWNER CONTEXT' : 'ZERO-TOOL SANDBOX'}</div>
-      </div>
-
-      <div class="transcript-feed">
-        ${transcript
-          .map((turn) => {
-            const roleClass =
-              turn.type === 'system'
-                ? 'system'
-                : turn.type === 'assistant'
-                ? `assistant ${active.id === 'owner' ? 'owner' : ''}`
-                : 'caller';
-            return `
-              <div class="t-turn">
-                <div class="t-time">${escapeHtml(turn.time)}</div>
-                <div class="t-body ${roleClass}">
-                  <div class="t-speaker">${escapeHtml(turn.speaker)}</div>
-                  <div class="t-text">${escapeHtml(turn.text)}</div>
-                </div>
-              </div>
-            `;
-          })
-          .join('')}
-      </div>
-    </div>
-  `;
 }
 
-/* -------------------------------------------
-   Section 4: Cost & Token Discipline
-------------------------------------------- */
-function renderCostTable() {
-  const tbody = document.getElementById('cost-table-body');
-  if (!tbody) return;
+/* ---------------- SANDBOX 1: COMMAND SIMULATOR ---------------- */
 
-  tbody.innerHTML = COST_ROWS.map(
-    (row) => `
-      <tr>
-        <td class="cost-layer">${escapeHtml(row.layer)}</td>
-        <td>${escapeHtml(row.implementation)}</td>
-        <td><span class="cost-tag ${row.costTone}">${escapeHtml(row.costTag)}</span></td>
-        <td>${escapeHtml(row.discipline)}</td>
-      </tr>
-    `
-  ).join('');
+function clearTraceTimers() {
+  state.traceTimers.forEach((id) => window.clearTimeout(id));
+  state.traceTimers = [];
 }
 
-function updateEstimator() {
-  const callsVal = document.getElementById('calls-val');
-  const minsVal = document.getElementById('minutes-val');
-  const summaryEl = document.getElementById('estimator-summary');
-  if (!callsVal || !minsVal || !summaryEl) return;
+function renderCommandButtons() {
+  const container = document.getElementById('command-buttons');
+  if (!container) return;
 
-  const totalMins = state.monthlyCalls * state.avgMinutes;
-
-  const plivoFixed = 2.5;
-  const plivoUsage = totalMins * 0.0085;
-  const guardedTts = totalMins * 0.015;
-  const blueprintMonthly = plivoFixed + plivoUsage + guardedTts;
-
-  const meteredStack = 15.0 + totalMins * 0.14;
-  const savingsPct = Math.round(((meteredStack - blueprintMonthly) / meteredStack) * 100);
-
-  callsVal.textContent = `${state.monthlyCalls} calls`;
-  minsVal.textContent = `${state.avgMinutes.toFixed(1)} min`;
-
-  summaryEl.innerHTML = `
-    <div class="est-stat">
-      <span class="mono-label">DIGITAL BRAIN EST.</span>
-      <span class="est-num accent-emerald">$${blueprintMonthly.toFixed(2)}<span style="font-size:14px;color:var(--ink-muted)">/mo</span></span>
-    </div>
-    <div class="est-stat">
-      <span class="mono-label">METERED API STACK</span>
-      <span class="est-num accent-amber">$${meteredStack.toFixed(2)}<span style="font-size:14px;color:var(--ink-muted)">/mo</span></span>
-    </div>
-    <div class="est-stat">
-      <span class="mono-label">AVOIDED DRIFT</span>
-      <span class="est-num">${savingsPct}%</span>
-    </div>
-  `;
-}
-
-function initEstimator() {
-  const callsSlider = document.getElementById('calls-slider');
-  const minsSlider = document.getElementById('minutes-slider');
-
-  if (callsSlider) {
-    callsSlider.addEventListener('input', (e) => {
-      state.monthlyCalls = Number(e.target.value);
-      updateEstimator();
-    });
-  }
-  if (minsSlider) {
-    minsSlider.addEventListener('input', (e) => {
-      state.avgMinutes = Number(e.target.value);
-      updateEstimator();
-    });
-  }
-
-  updateEstimator();
-}
-
-/* -------------------------------------------
-   Section 5: Open-Source Starter Blueprint
-------------------------------------------- */
-function renderStarterBlueprint() {
-  const treeEl = document.getElementById('file-tree');
-  const filenameEl = document.getElementById('preview-filename');
-  const codeEl = document.getElementById('preview-code');
-  const copyPreviewBtn = document.getElementById('copy-preview-btn');
-  const stepsEl = document.getElementById('setup-steps');
-
-  if (!treeEl || !filenameEl || !codeEl || !stepsEl) return;
-
-  const selectedFile =
-    STARTER_FILES.find((f) => f.path === state.selectedFilePath && !f.isFolder) ||
-    STARTER_FILES.find((f) => !f.isFolder);
-
-  treeEl.innerHTML = STARTER_FILES.map((item) => {
-    if (item.isFolder) {
-      return `
-        <div class="tree-item is-folder" role="treeitem">
-          <span>${escapeHtml(item.path)}</span>
-          <span class="tree-note">${escapeHtml(item.note)}</span>
-        </div>
-      `;
-    }
-    const isSel = item.path === selectedFile.path;
+  container.innerHTML = COMMAND_SCENARIOS.map((item) => {
+    const isActive = item.id === state.activeCommandId;
     return `
       <button
         type="button"
-        role="treeitem"
-        aria-selected="${isSel}"
-        class="tree-item ${isSel ? 'is-selected' : ''}"
-        data-file-path="${escapeHtml(item.path)}"
+        class="command-btn ${isActive ? 'is-active' : ''}"
+        data-command-id="${escapeHtml(item.id)}"
+        aria-pressed="${isActive}"
       >
-        <span>${escapeHtml(item.path)}</span>
-        <span class="tree-note">${escapeHtml(item.note)}</span>
+        <span class="command-cat">${escapeHtml(item.category)}</span>
+        <span class="command-label">${escapeHtml(item.label)}</span>
       </button>
     `;
   }).join('');
 
-  treeEl.querySelectorAll('[data-file-path]').forEach((btn) => {
+  container.querySelectorAll('.command-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      state.selectedFilePath = btn.dataset.filePath;
-      renderStarterBlueprint();
+      const id = btn.getAttribute('data-command-id');
+      if (id) runCommandSimulation(id);
     });
   });
+}
 
-  filenameEl.textContent = `digital-brain/${selectedFile.path.trim()}`;
-  codeEl.textContent = selectedFile.content;
-
-  if (copyPreviewBtn) {
-    copyPreviewBtn.onclick = () => copyText(selectedFile.content, copyPreviewBtn);
+function getHarnessStepCopy(scenario) {
+  const activeProvider = getActiveProvider();
+  if (!activeProvider) {
+    return {
+      badge: 'WAITING FOR MODEL',
+      summary: 'All three AI providers are switched off in Sandbox 2. Your request stays queued locally until any provider is back online.',
+      detail: 'Turn on Antigravity, Claude, or Codex below'
+    };
   }
 
-  stepsEl.innerHTML = SETUP_STEPS.map(
-    (step, idx) => `
-      <article class="step-card">
-        <div class="step-top">
-          <span class="step-num">${escapeHtml(step.num)}</span>
+  const isPrimary = activeProvider.priority === 1;
+  return {
+    badge: isPrimary ? `${activeProvider.name.toUpperCase()} ACTIVE` : `REROUTED TO ${activeProvider.name.toUpperCase()}`,
+    summary: isPrimary
+      ? scenario.steps.harness.summary
+      : `Primary assistant is off, so ${activeProvider.name} steps in automatically with the exact same memory folder.`,
+    detail: `Handled by ${activeProvider.name} (${activeProvider.plan.toLowerCase()}, $0 extra API cost)`
+  };
+}
+
+function renderTrace() {
+  const scenario = COMMAND_SCENARIOS.find((c) => c.id === state.activeCommandId) || COMMAND_SCENARIOS[0];
+  const promptEl = document.getElementById('trace-prompt');
+  const stepsEl = document.getElementById('trace-steps');
+  const drawerEl = document.getElementById('approval-drawer');
+
+  if (!promptEl || !stepsEl || !drawerEl) return;
+
+  promptEl.textContent = scenario.prompt;
+
+  const harnessCopy = getHarnessStepCopy(scenario);
+  const outcomeData =
+    scenario.needsApproval && state.approvalState === 'cancelled'
+      ? scenario.steps.cancelledOutcome
+      : scenario.steps.outcome;
+
+  const stepDefs = [
+    {
+      num: 'STEP 01',
+      title: scenario.steps.router.title,
+      badge: scenario.steps.router.badge,
+      summary: scenario.steps.router.summary,
+      detail: scenario.steps.router.detail
+    },
+    {
+      num: 'STEP 02',
+      title: scenario.steps.harness.title,
+      badge: harnessCopy.badge,
+      summary: harnessCopy.summary,
+      detail: harnessCopy.detail
+    },
+    {
+      num: 'STEP 03',
+      title: scenario.steps.gate.title,
+      badge:
+        scenario.needsApproval && state.approvalState === 'approved'
+          ? 'APPROVED BY YOU'
+          : scenario.needsApproval && state.approvalState === 'cancelled'
+            ? 'BLOCKED BY YOU'
+            : scenario.steps.gate.badge,
+      summary: scenario.steps.gate.summary,
+      detail: scenario.steps.gate.detail
+    },
+    {
+      num: 'STEP 04',
+      title: outcomeData.title,
+      badge: outcomeData.badge,
+      summary: outcomeData.summary,
+      detail: outcomeData.detail
+    }
+  ];
+
+  stepsEl.innerHTML = stepDefs
+    .map((step, index) => {
+      const stepNumber = index + 1;
+      let statusClass = '';
+      let pillClass = 'pill-neutral';
+
+      if (stepNumber < state.traceStage) {
+        statusClass = 'is-done';
+        pillClass = 'pill-emerald';
+      } else if (stepNumber === state.traceStage) {
+        if (stepNumber === 3 && scenario.needsApproval && state.approvalState === 'pending') {
+          statusClass = 'is-paused';
+          pillClass = 'pill-amber';
+        } else if (stepNumber === 4 && state.approvalState === 'cancelled') {
+          statusClass = 'is-cancelled';
+          pillClass = 'pill-crimson';
+        } else if (stepNumber === 4) {
+          statusClass = 'is-done';
+          pillClass = 'pill-emerald';
+        } else {
+          statusClass = 'is-active';
+          pillClass = 'pill-amber';
+        }
+      }
+
+      return `
+        <li class="trace-step ${statusClass}">
+          <div class="trace-step-top">
+            <span class="trace-step-num">${escapeHtml(step.num)}</span>
+            <span class="step-pill ${pillClass}">${escapeHtml(step.badge)}</span>
+          </div>
+          <h3 class="trace-step-title">${escapeHtml(step.title)}</h3>
+          <p class="trace-step-summary">${escapeHtml(step.summary)}</p>
+          <div class="trace-step-detail">${escapeHtml(step.detail)}</div>
+        </li>
+      `;
+    })
+    .join('');
+
+  if (scenario.needsApproval && state.approvalState === 'pending' && state.traceStage === 3) {
+    drawerEl.hidden = false;
+    drawerEl.innerHTML = `
+      <div class="approval-head">
+        <h3 class="approval-title">Safety Approval Gate — Waiting for Your Decision</h3>
+        <span class="step-pill pill-amber">OUTWARD ACTION PAUSED</span>
+      </div>
+      <div class="approval-draft">
+        <p><strong>To:</strong> ${escapeHtml(scenario.draftPreview.to)}</p>
+        <p><strong>Subject:</strong> ${escapeHtml(scenario.draftPreview.subject)}</p>
+        <p>${escapeHtml(scenario.draftPreview.body)}</p>
+      </div>
+      <div class="approval-actions">
+        <button type="button" class="btn btn-emerald" id="approve-send-btn">Approve &amp; Send</button>
+        <button type="button" class="btn-ghost" id="cancel-send-btn">Cancel Send</button>
+      </div>
+    `;
+
+    const approveBtn = document.getElementById('approve-send-btn');
+    const cancelBtn = document.getElementById('cancel-send-btn');
+
+    if (approveBtn) {
+      approveBtn.addEventListener('click', () => {
+        state.approvalState = 'approved';
+        state.traceStage = 4;
+        renderTrace();
+      });
+    }
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        state.approvalState = 'cancelled';
+        state.traceStage = 4;
+        renderTrace();
+      });
+    }
+  } else {
+    drawerEl.hidden = true;
+    drawerEl.innerHTML = '';
+  }
+}
+
+function runCommandSimulation(commandId) {
+  clearTraceTimers();
+  state.activeCommandId = commandId;
+  const scenario = COMMAND_SCENARIOS.find((c) => c.id === commandId) || COMMAND_SCENARIOS[0];
+  state.approvalState = scenario.needsApproval ? 'pending' : 'idle';
+  renderCommandButtons();
+
+  const targetFinalStage = scenario.needsApproval ? 3 : 4;
+
+  if (prefersReducedMotion()) {
+    state.traceStage = targetFinalStage;
+    renderTrace();
+    return;
+  }
+
+  state.traceStage = 1;
+  renderTrace();
+
+  for (let stage = 2; stage <= targetFinalStage; stage += 1) {
+    const timerId = window.setTimeout(() => {
+      state.traceStage = stage;
+      renderTrace();
+    }, (stage - 1) * 320);
+    state.traceTimers.push(timerId);
+  }
+}
+
+/* ---------------- SANDBOX 2: BREAK A MODEL ---------------- */
+
+function renderFailover() {
+  const statusBar = document.getElementById('failover-status-bar');
+  const waterfall = document.getElementById('failover-waterfall');
+  const emptyBanner = document.getElementById('failover-empty-banner');
+  if (!statusBar || !waterfall || !emptyBanner) return;
+
+  const active = getActiveProvider();
+  const onlineCount = FAILOVER_PROVIDERS.filter((p) => state.providersOnline[p.id]).length;
+
+  statusBar.innerHTML = `
+    <div class="status-tile">
+      <div class="status-tile-label">Active Assistant</div>
+      <div class="status-tile-value ${active ? 'is-emerald' : 'is-amber'}">
+        ${active ? escapeHtml(active.name) : 'Paused'}
+      </div>
+      <p class="status-tile-note">
+        ${
+          active
+            ? active.priority === 1
+              ? 'Primary assistant is handling requests normally.'
+              : `Seamless failover active — ${active.name} took over with zero downtime.`
+            : 'All providers are toggled off right now.'
+        }
+      </p>
+    </div>
+    <div class="status-tile">
+      <div class="status-tile-label">Shared Memory</div>
+      <div class="status-tile-value is-emerald">100% Intact</div>
+      <p class="status-tile-note">
+        All ${onlineCount} online assistant${onlineCount === 1 ? '' : 's'} read the exact same Markdown folder.
+      </p>
+    </div>
+    <div class="status-tile">
+      <div class="status-tile-label">Extra API Spend</div>
+      <div class="status-tile-value is-emerald">$0</div>
+      <p class="status-tile-note">
+        Stays inside existing flat-rate plans — never falls back to surprise metered bills.
+      </p>
+    </div>
+  `;
+
+  waterfall.innerHTML = FAILOVER_PROVIDERS.map((provider) => {
+    const isOnline = Boolean(state.providersOnline[provider.id]);
+    const isServing = active && active.id === provider.id;
+
+    const cardClass = isServing ? 'is-serving' : !isOnline ? 'is-offline' : '';
+    const pillClass = isServing ? 'pill-emerald' : isOnline ? 'pill-neutral' : 'pill-crimson';
+    const badgeLabel = isServing ? 'ACTIVE NOW' : isOnline ? 'STANDBY' : 'OFFLINE';
+
+    return `
+      <article class="provider-card ${cardClass}">
+        <div>
+          <div class="provider-top">
+            <span class="provider-priority">Priority ${provider.priority}</span>
+            <span class="step-pill ${pillClass}">${badgeLabel}</span>
+          </div>
+          <h3 class="provider-name">${escapeHtml(provider.name)}</h3>
+          <p class="provider-role">${escapeHtml(provider.role)}</p>
+          <p class="provider-strength">${escapeHtml(provider.strength)}</p>
         </div>
-        <h3 class="step-title">${escapeHtml(step.title)}</h3>
-        <p class="step-desc">${escapeHtml(step.desc)}</p>
-        <div class="step-cmd">
-          <code>${escapeHtml(step.cmd)}</code>
-          <button type="button" class="copy-btn" data-copy-step="${idx}">Copy</button>
+
+        <div class="provider-controls">
+          <span class="provider-plan">${escapeHtml(provider.plan)}</span>
+          <button
+            type="button"
+            class="switch-btn"
+            role="switch"
+            aria-checked="${isOnline}"
+            aria-label="Toggle ${escapeHtml(provider.name)} ${isOnline ? 'off' : 'on'}"
+            data-provider-id="${escapeHtml(provider.id)}"
+          >
+            <span class="switch-track" aria-hidden="true">
+              <span class="switch-thumb"></span>
+            </span>
+            <span>${isOnline ? 'Online' : 'Offline'}</span>
+          </button>
         </div>
       </article>
-    `
-  ).join('');
+    `;
+  }).join('');
 
-  stepsEl.querySelectorAll('[data-copy-step]').forEach((btn) => {
+  waterfall.querySelectorAll('.switch-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const idx = Number(btn.dataset.copyStep);
-      copyText(SETUP_STEPS[idx].cmd, btn);
+      const id = btn.getAttribute('data-provider-id');
+      if (!id) return;
+      state.providersOnline[id] = !state.providersOnline[id];
+      renderFailover();
+      renderTrace();
     });
   });
+
+  emptyBanner.hidden = Boolean(active);
 }
 
-function copyText(text, button) {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(() => {
-      const original = button.textContent;
-      button.textContent = 'Copied';
-      setTimeout(() => {
-        button.textContent = original;
-      }, 1400);
+/* ---------------- SANDBOX 3: 5-FOLDER EXPLORER ---------------- */
+
+function renderFolderExplorer() {
+  const listEl = document.getElementById('folder-list');
+  const detailEl = document.getElementById('folder-detail');
+  if (!listEl || !detailEl) return;
+
+  listEl.innerHTML = BRAIN_FOLDERS.map((folder, index) => {
+    const isActive = folder.id === state.activeFolderId;
+    return `
+      <button
+        type="button"
+        class="folder-btn ${isActive ? 'is-active' : ''}"
+        role="tab"
+        aria-selected="${isActive}"
+        data-folder-id="${escapeHtml(folder.id)}"
+      >
+        <span class="folder-btn-main">
+          <span class="folder-btn-name">${escapeHtml(folder.name)}</span>
+          <span class="folder-btn-tag">${escapeHtml(folder.tag)}</span>
+        </span>
+        <span class="folder-btn-arrow" aria-hidden="true">0${index + 1}</span>
+      </button>
+    `;
+  }).join('');
+
+  listEl.querySelectorAll('.folder-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-folder-id');
+      if (!id || id === state.activeFolderId) return;
+      state.activeFolderId = id;
+      renderFolderExplorer();
+    });
+  });
+
+  const activeFolder =
+    BRAIN_FOLDERS.find((f) => f.id === state.activeFolderId) || BRAIN_FOLDERS[0];
+
+  detailEl.innerHTML = `
+    <div class="folder-detail-path">${escapeHtml(activeFolder.path)}</div>
+    <h3 class="folder-detail-title">${escapeHtml(activeFolder.headline)}</h3>
+    <p class="folder-detail-copy">
+      ${escapeHtml(activeFolder.sentences[0])} ${escapeHtml(activeFolder.sentences[1])}
+    </p>
+    <div class="folder-preview">
+      <div class="folder-preview-bar">
+        <span>${escapeHtml(activeFolder.sampleFile)}</span>
+        <span>PLAIN MARKDOWN</span>
+      </div>
+      <pre><code>${escapeHtml(activeFolder.sampleContent)}</code></pre>
+    </div>
+  `;
+}
+
+/* ---------------- BOOT ---------------- */
+
+function init() {
+  initHeaderAndProgress();
+  renderFailover();
+  renderFolderExplorer();
+  runCommandSimulation(COMMAND_SCENARIOS[0].id);
+
+  const replayBtn = document.getElementById('replay-trace-btn');
+  if (replayBtn) {
+    replayBtn.addEventListener('click', () => {
+      runCommandSimulation(state.activeCommandId);
+    });
+  }
+
+  const restoreBtn = document.getElementById('restore-providers-btn');
+  if (restoreBtn) {
+    restoreBtn.addEventListener('click', () => {
+      state.providersOnline = { antigravity: true, claude: true, codex: true };
+      renderFailover();
+      renderTrace();
     });
   }
 }
 
-/* -------------------------------------------
-   Bootstrap
-------------------------------------------- */
-document.addEventListener('DOMContentLoaded', () => {
-  initMobileNav();
-  initScrollProgress();
-  initVoicePlayer();
-  initTraceChips();
-  renderArchitecture();
-  renderInspector();
-  renderSimulator();
-  renderCostTable();
-  initEstimator();
-  renderStarterBlueprint();
-});
+document.addEventListener('DOMContentLoaded', init);
