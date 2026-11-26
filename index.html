@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personal AI Assistant Blueprint — Mohammed KM</title>
+    <meta
+      name="description"
+      content="One personal brain across voice, messaging, and cloud — zero hardware lock-in, zero metered API drift. An interactive architectural blueprint by Mohammed KM."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div class="progress-bar" id="reading-progress" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a href="#top" class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span class="brand-title">Personal AI Blueprint</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary sections">
+          <a href="#architecture">Architecture</a>
+          <a href="#simulator">Permissions</a>
+          <a href="#economics">Cost Discipline</a>
+          <a href="#starter">Starter Kit</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- 1. HERO -->
+      <section class="hero section">
+        <div class="container">
+          <div class="eyebrow">
+            <span>ARCHITECTURE MONOGRAPH</span>
+            <span class="sep" aria-hidden="true">/</span>
+            <span>MOHAMMED KM</span>
+          </div>
+          <h1 class="hero-title">Personal AI Assistant Blueprint</h1>
+          <p class="hero-thesis">
+            One personal brain across voice, messaging, and cloud &mdash; zero hardware lock-in, zero metered API drift.
+          </p>
+          <p class="hero-sub">
+            A plain-text Markdown knowledge base paired with native 8&nbsp;kHz telephony, deterministic Caller-ID isolation,
+            flat-rate CLI reasoning harnesses, and automatic Telegram handoff for long-running work.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#architecture" class="btn btn-primary">Inspect Architecture</a>
+            <a href="#simulator" class="btn btn-secondary">Run Permission Simulator</a>
+          </div>
+
+          <div class="metrics-strip" role="list" aria-label="Production metrics">
+            <article class="metric-card" role="listitem">
+              <div class="metric-value accent-amber">2.0s</div>
+              <div class="metric-label">Fast-Path Memory Recall</div>
+              <p class="metric-detail">
+                Local Markdown index lookup before invoking any heavy CLI harness or remote model.
+              </p>
+            </article>
+            <article class="metric-card" role="listitem">
+              <div class="metric-value accent-emerald">8 kHz</div>
+              <div class="metric-label">Native ulaw Telephony</div>
+              <p class="metric-detail">
+                End-to-end Plivo <code>ulaw_8000</code> audio path without transcoding jitter or PCM bloat.
+              </p>
+            </article>
+            <article class="metric-card" role="listitem">
+              <div class="metric-value">0 INR</div>
+              <div class="metric-label">Extra Cloud Hosting</div>
+              <p class="metric-detail">
+                Co-located on an existing Linux VPS and synced desktop workspace over a single Drive bus.
+              </p>
+            </article>
+            <article class="metric-card" role="listitem">
+              <div class="metric-value accent-emerald">2-Lane</div>
+              <div class="metric-label">Caller Isolation</div>
+              <p class="metric-detail">
+                Hard Caller-ID boundary separating full Owner execution from a zero-tool Public Desk.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. INTERACTIVE ARCHITECTURE DIAGRAM -->
+      <section id="architecture" class="section section-bordered">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">01 &mdash; SYSTEM TOPOLOGY</div>
+              <h2 class="section-title">Interactive Architecture Diagram</h2>
+            </div>
+            <p class="section-desc">
+              Select any node in the call pipeline to inspect its engineering trade-offs, millisecond latency budget, and non-negotiable security invariant.
+            </p>
+          </div>
+
+          <div class="path-controls" role="group" aria-label="Trace call path">
+            <button type="button" class="chip is-active" data-trace="all">Full Topology</button>
+            <button type="button" class="chip" data-trace="owner">Trace Owner Lane</button>
+            <button type="button" class="chip" data-trace="public">Trace Public Desk Lane</button>
+          </div>
+
+          <div class="arch-layout">
+            <div class="arch-canvas" id="arch-canvas" aria-label="Interactive architecture pipeline">
+              <!-- Rendered dynamically by src/main.js -->
+            </div>
+
+            <aside class="inspector-panel" id="node-inspector" aria-live="polite">
+              <!-- Populated dynamically when a node is selected -->
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. INTERACTIVE PUBLIC VS PRIVATE PERMISSION SIMULATOR -->
+      <section id="simulator" class="section section-bordered">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">02 &mdash; SECURITY BOUNDARY</div>
+              <h2 class="section-title">Public vs Private Permission Simulator</h2>
+            </div>
+            <p class="section-desc">
+              Test how the deterministic Caller-ID router isolates identity before a single token is generated. Toggle caller profiles to verify allowed context, hard-blocked fields, and live transcripts.
+            </p>
+          </div>
+
+          <div class="sim-controls-row">
+            <div class="sim-tabs" id="caller-tabs" role="tablist" aria-label="Caller profile selector">
+              <!-- Rendered dynamically -->
+            </div>
+            <div class="sim-lang-wrap" id="lang-selector-wrap">
+              <!-- Shown for multilingual Public Desk callers -->
+            </div>
+          </div>
+
+          <div class="sim-grid" id="simulator-output" aria-live="polite">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. COST & TOKEN DISCIPLINE TABLE -->
+      <section id="economics" class="section section-bordered">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">03 &mdash; UNIT ECONOMICS</div>
+              <h2 class="section-title">Cost &amp; Token Discipline</h2>
+            </div>
+            <p class="section-desc">
+              Metered LLM APIs turn every voice turn and background retry into compounding spend. This stack pairs flat-rate CLI subscriptions with strict telephony and speech-synthesis guards.
+            </p>
+          </div>
+
+          <div class="estimator-card">
+            <div class="estimator-header">
+              <div>
+                <div class="mono-label">INTERACTIVE VOLUME ESTIMATOR</div>
+                <h3 class="card-heading">Monthly Run-Rate vs Metered API Stack</h3>
+              </div>
+              <div class="estimator-summary" id="estimator-summary">
+                <!-- Dynamic totals -->
+              </div>
+            </div>
+            <div class="estimator-sliders">
+              <label class="slider-field">
+                <span class="slider-meta">
+                  <span>Monthly Calls</span>
+                  <strong id="calls-val">60 calls</strong>
+                </span>
+                <input type="range" id="calls-slider" min="10" max="300" step="10" value="60" />
+              </label>
+              <label class="slider-field">
+                <span class="slider-meta">
+                  <span>Avg Call Duration</span>
+                  <strong id="minutes-val">2.0 min</strong>
+                </span>
+                <input type="range" id="minutes-slider" min="0.5" max="6" step="0.5" value="2" />
+              </label>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="cost-table">
+              <thead>
+                <tr>
+                  <th>Layer</th>
+                  <th>Blueprint Implementation</th>
+                  <th>Cost Model</th>
+                  <th>Discipline &amp; Guardrails</th>
+                </tr>
+              </thead>
+              <tbody id="cost-table-body">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. OPEN-SOURCE STARTER BLUEPRINT -->
+      <section id="starter" class="section section-bordered">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">04 &mdash; REPRODUCIBLE SETUP</div>
+              <h2 class="section-title">Open-Source Starter Blueprint</h2>
+            </div>
+            <p class="section-desc">
+              A minimal, portable directory layout and five-step setup path. Everything lives in readable Markdown and small Node/Python utilities &mdash; no proprietary SaaS lock-in.
+            </p>
+          </div>
+
+          <div class="starter-grid">
+            <div class="tree-panel">
+              <div class="panel-bar">
+                <span class="mono-label">FOLDER ARCHITECTURE</span>
+                <span class="panel-hint">Click a file to inspect template</span>
+              </div>
+              <div class="file-tree" id="file-tree" role="tree" aria-label="Starter repository structure">
+                <!-- Rendered dynamically -->
+              </div>
+              <div class="code-preview">
+                <div class="code-preview-bar">
+                  <span class="mono-label" id="preview-filename">mkm-starter/lanes/router.js</span>
+                  <button type="button" class="copy-btn" id="copy-preview-btn">Copy</button>
+                </div>
+                <pre><code id="preview-code"></code></pre>
+              </div>
+            </div>
+
+            <div class="steps-panel" id="setup-steps">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div>
+          <div class="footer-title">Personal AI Assistant Blueprint</div>
+          <p class="footer-note">
+            Authored by Mohammed KM. All transcripts, numbers, and configurations shown are synthetic placeholders for architectural illustration.
+          </p>
+        </div>
+        <div class="footer-meta">
+          <span>Dark Editorial Spec</span>
+          <span class="sep" aria-hidden="true">/</span>
+          <span>Zero Metered Drift</span>
+          <span class="sep" aria-hidden="true">/</span>
+          <a href="#top">Back to top</a>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

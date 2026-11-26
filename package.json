@@ -1,0 +1,15 @@
+{
+  "name": "personal-ai-assistant-blueprint",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive editorial showcase of the Personal AI Assistant Blueprint by Mohammed KM.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  }
+}
