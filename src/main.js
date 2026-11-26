@@ -41,6 +41,35 @@ function formatClock(seconds) {
 }
 
 /* -------------------------------------------
+   Mobile Navigation Toggle
+------------------------------------------- */
+function initMobileNav() {
+  const toggle = document.getElementById('nav-toggle');
+  const nav = document.getElementById('site-nav');
+  if (!toggle || !nav) return;
+
+  const setOpen = (open) => {
+    nav.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+  };
+
+  toggle.addEventListener('click', () => {
+    const isOpen = nav.classList.contains('is-open');
+    setOpen(!isOpen);
+  });
+
+  nav.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => setOpen(false));
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768 && nav.classList.contains('is-open')) {
+      setOpen(false);
+    }
+  });
+}
+
+/* -------------------------------------------
    Reading Progress Indicator
 ------------------------------------------- */
 function initScrollProgress() {
@@ -249,23 +278,27 @@ function renderArchitecture() {
   canvas.innerHTML = `
     <div class="arch-spine">
       ${renderNodeCard(plivo)}
-      <svg class="arch-connector-svg" viewBox="0 0 200 34" preserveAspectRatio="none" aria-hidden="true">
+      <svg class="arch-connector-svg" viewBox="0 0 200 34" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <line x1="100" y1="0" x2="100" y2="28" stroke="${spineStroke}" stroke-width="1.5" stroke-opacity="0.7" />
         <polygon points="96,26 104,26 100,33" fill="${spineStroke}" fill-opacity="0.85" />
       </svg>
 
       ${renderNodeCard(bridge)}
-      <svg class="arch-connector-svg" viewBox="0 0 200 34" preserveAspectRatio="none" aria-hidden="true">
+      <svg class="arch-connector-svg" viewBox="0 0 200 34" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <line x1="100" y1="0" x2="100" y2="28" stroke="${spineStroke}" stroke-width="1.5" stroke-opacity="0.7" />
         <polygon points="96,26 104,26 100,33" fill="${spineStroke}" fill-opacity="0.85" />
       </svg>
 
       ${renderNodeCard(router)}
-      <svg class="arch-split-svg" viewBox="0 0 400 48" preserveAspectRatio="none" aria-hidden="true">
+      <svg class="arch-split-svg arch-split-desktop" viewBox="0 0 400 48" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <path d="M 200 0 L 200 20 L 100 20 L 100 42" fill="none" stroke="${ownerStroke}" stroke-width="1.5" />
         <polygon points="96,40 104,40 100,47" fill="${ownerStroke}" />
         <path d="M 200 0 L 200 20 L 300 20 L 300 42" fill="none" stroke="${publicStroke}" stroke-width="1.5" />
         <polygon points="296,40 304,40 300,47" fill="${publicStroke}" />
+      </svg>
+      <svg class="arch-connector-svg arch-split-mobile" viewBox="0 0 200 34" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <line x1="100" y1="0" x2="100" y2="28" stroke="${spineStroke}" stroke-width="1.5" stroke-opacity="0.7" />
+        <polygon points="96,26 104,26 100,33" fill="${spineStroke}" fill-opacity="0.85" />
       </svg>
 
       <div class="arch-branches">
@@ -659,6 +692,7 @@ function copyText(text, button) {
    Bootstrap
 ------------------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
+  initMobileNav();
   initScrollProgress();
   initVoicePlayer();
   initTraceChips();
