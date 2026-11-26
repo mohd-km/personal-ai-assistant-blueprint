@@ -32,6 +32,14 @@ function escapeHtml(str) {
     .replaceAll('"', '&quot;');
 }
 
+function formatClock(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+  const total = Math.floor(seconds);
+  const mins = Math.floor(total / 60);
+  const secs = total % 60;
+  return `${mins}:${String(secs).padStart(2, '0')}`;
+}
+
 /* -------------------------------------------
    Reading Progress Indicator
 ------------------------------------------- */
@@ -48,6 +56,144 @@ function initScrollProgress() {
 
   window.addEventListener('scroll', update, { passive: true });
   update();
+}
+
+/* -------------------------------------------
+   Section 1B: Cloned Voice Desk Audio Player
+------------------------------------------- */
+function initVoicePlayer() {
+  const audio = document.getElementById('voice-demo-audio');
+  const card = document.getElementById('voice-player-card');
+  const playBtn = document.getElementById('voice-play-btn');
+  const track = document.getElementById('voice-progress-track');
+  const fill = document.getElementById('voice-progress-fill');
+  const currentEl = document.getElementById('voice-time-current');
+  const durationEl = document.getElementById('voice-time-duration');
+  const statusEl = document.getElementById('voice-status-badge');
+
+  if (!audio || !card || !playBtn || !track || !fill || !currentEl || !durationEl || !statusEl) {
+    return;
+  }
+
+  let rafId = null;
+
+  const syncProgress = () => {
+    const dur = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
+    const cur = audio.currentTime || 0;
+    const pct = dur > 0 ? Math.min(100, Math.max(0, (cur / dur) * 100)) : 0;
+
+    fill.style.width = `${pct.toFixed(2)}%`;
+    track.setAttribute('aria-valuenow', String(Math.round(pct)));
+    currentEl.textContent = formatClock(cur);
+    if (dur > 0) {
+      durationEl.textContent = formatClock(dur);
+    }
+  };
+
+  const tick = () => {
+    syncProgress();
+    if (!audio.paused && !audio.ended) {
+      rafId = requestAnimationFrame(tick);
+    } else {
+      rafId = null;
+    }
+  };
+
+  const setPlayingUI = (playing, label) => {
+    card.classList.toggle('is-playing', playing);
+    playBtn.setAttribute('aria-pressed', String(playing));
+    playBtn.setAttribute(
+      'aria-label',
+      playing ? 'Pause cloned voice desk greeting' : 'Play cloned voice desk greeting'
+    );
+    statusEl.textContent = label || (playing ? 'PLAYING' : 'READY');
+  };
+
+  audio.addEventListener('loadedmetadata', () => {
+    if (Number.isFinite(audio.duration) && audio.duration > 0) {
+      durationEl.textContent = formatClock(audio.duration);
+    }
+    syncProgress();
+  });
+
+  audio.addEventListener('play', () => {
+    setPlayingUI(true, 'PLAYING');
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(tick);
+  });
+
+  audio.addEventListener('pause', () => {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    const isAtStart = audio.currentTime <= 0.05;
+    setPlayingUI(false, isAtStart ? 'READY' : 'PAUSED');
+    syncProgress();
+  });
+
+  audio.addEventListener('ended', () => {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    fill.style.width = '100%';
+    track.setAttribute('aria-valuenow', '100');
+    setPlayingUI(false, 'REPLAY');
+    setTimeout(() => {
+      if (audio.paused && audio.ended) {
+        audio.currentTime = 0;
+        syncProgress();
+        statusEl.textContent = 'READY';
+      }
+    }, 900);
+  });
+
+  audio.addEventListener('error', () => {
+    setPlayingUI(false, 'UNAVAILABLE');
+  });
+
+  playBtn.addEventListener('click', () => {
+    if (audio.paused) {
+      if (audio.ended) {
+        audio.currentTime = 0;
+      }
+      audio.play().catch(() => {
+        setPlayingUI(false, 'READY');
+      });
+    } else {
+      audio.pause();
+    }
+  });
+
+  const seekByFraction = (fraction) => {
+    const dur = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
+    if (!dur) return;
+    const clamped = Math.min(1, Math.max(0, fraction));
+    audio.currentTime = clamped * dur;
+    syncProgress();
+  };
+
+  track.addEventListener('click', (e) => {
+    const rect = track.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    seekByFraction((e.clientX - rect.left) / rect.width);
+  });
+
+  track.addEventListener('keydown', (e) => {
+    const dur = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 0;
+    if (!dur) return;
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      seekByFraction((audio.currentTime + 1) / dur);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      seekByFraction((audio.currentTime - 1) / dur);
+    } else if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      playBtn.click();
+    }
+  });
 }
 
 /* -------------------------------------------
@@ -372,14 +518,11 @@ function updateEstimator() {
 
   const totalMins = state.monthlyCalls * state.avgMinutes;
 
-  // Blueprint incremental voice cost:
-  // Plivo DID ($2.50) + PSTN inbound ($0.0085/min) + ElevenLabs guarded TTS (~$0.015/min with 45-word cap & cache)
   const plivoFixed = 2.5;
   const plivoUsage = totalMins * 0.0085;
   const guardedTts = totalMins * 0.015;
   const blueprintMonthly = plivoFixed + plivoUsage + guardedTts;
 
-  // Typical metered voice-LLM SaaS stack (realtime/metered LLM + voice platform + hosting ~$0.14/min + $15 base)
   const meteredStack = 15.0 + totalMins * 0.14;
   const savingsPct = Math.round(((meteredStack - blueprintMonthly) / meteredStack) * 100);
 
@@ -388,7 +531,7 @@ function updateEstimator() {
 
   summaryEl.innerHTML = `
     <div class="est-stat">
-      <span class="mono-label">BLUEPRINT EST.</span>
+      <span class="mono-label">DIGITAL BRAIN EST.</span>
       <span class="est-num accent-emerald">$${blueprintMonthly.toFixed(2)}<span style="font-size:14px;color:var(--ink-muted)">/mo</span></span>
     </div>
     <div class="est-stat">
@@ -469,7 +612,7 @@ function renderStarterBlueprint() {
     });
   });
 
-  filenameEl.textContent = `mkm-starter/${selectedFile.path.trim()}`;
+  filenameEl.textContent = `digital-brain/${selectedFile.path.trim()}`;
   codeEl.textContent = selectedFile.content;
 
   if (copyPreviewBtn) {
@@ -517,6 +660,7 @@ function copyText(text, button) {
 ------------------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
   initScrollProgress();
+  initVoicePlayer();
   initTraceChips();
   renderArchitecture();
   renderInspector();

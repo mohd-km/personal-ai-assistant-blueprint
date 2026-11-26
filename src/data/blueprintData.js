@@ -3,15 +3,15 @@ export const ARCHITECTURE_NODES = [
     id: 'plivo',
     step: '01 / INGRESS',
     title: 'Phone Call (Plivo ulaw_8000)',
-    shortSub: 'Inbound PSTN DID streams raw 8 kHz mu-law audio frames over WebSocket with caller metadata.',
+    shortSub: 'Inbound PSTN DID streams raw 8 kHz mu-law audio frames over WebSocket directly to the single 24/7 Linux node.',
     badge: 'ulaw_8000',
     badgeTone: 'emerald',
     lane: 'shared',
-    protocol: 'PSTN -> Plivo XML -> Bidirectional WebSocket (8 kHz mu-law, 20ms frames)',
+    protocol: 'PSTN -> Plivo XML -> Bidirectional WebSocket on Single Linux Node (8 kHz mu-law, 20ms frames)',
     tradeoffs: [
       'Stays in native 8 kHz mu-law end-to-end instead of upsampling to 16/24 kHz PCM, eliminating CPU resampling overhead and jitter buffer drift.',
-      'Uses a standard local DID ($2.50/mo) rather than a proprietary VoIP app so any caller on any mobile network reaches the assistant without installing software.',
-      'Rejects SIP trunk complexity in favor of Plivo managed WebSocket media streams with automatic TLS termination.'
+      'Uses a standard local DID ($2.50/mo) rather than a proprietary VoIP app so any caller on any mobile network reaches the digital brain without installing software.',
+      'Terminates directly on the co-located 24/7 Linux node behind managed TLS, avoiding serverless cold starts or separate voice middleware.'
     ],
     latencyBudget: {
       total: '140 ms',
@@ -28,15 +28,15 @@ export const ARCHITECTURE_NODES = [
   {
     id: 'bridge',
     step: '02 / AUDIO RUNTIME',
-    title: 'Voice Bridge',
-    shortSub: 'Manages turn-taking VAD, barge-in cancellation, STT streaming, and ElevenLabs ulaw_8000 synthesis.',
-    badge: 'Barge-In + VAD',
+    title: 'Cloned-Voice Bridge',
+    shortSub: 'Manages turn-taking VAD, barge-in cancellation, STT streaming, and ElevenLabs v4 Turbo ulaw_8000 synthesis.',
+    badge: 'ElevenLabs v4 Turbo',
     badgeTone: 'amber',
     lane: 'shared',
-    protocol: 'Local Node.js WebSocket Server -> Streaming STT + ElevenLabs ulaw_8000 TTS',
+    protocol: 'Local Node.js WebSocket Server -> Streaming STT + ElevenLabs v4 Turbo ulaw_8000 TTS',
     tradeoffs: [
-      'Requests ElevenLabs output directly in ulaw_8000 format so synthesized chunks pipe straight back to Plivo without FFmpeg transcoding.',
-      'Enforces a 45-word voice response ceiling and pre-caches standard greetings, cutting ElevenLabs character consumption by more than 60%.',
+      'Requests ElevenLabs v4 Turbo output directly in ulaw_8000 format so synthesized cloned-voice chunks pipe straight back to Plivo without FFmpeg transcoding.',
+      'Enforces a 45-word voice response ceiling and pre-caches standard greetings, cutting speech-synthesis character consumption by more than 60%.',
       'Supports instant barge-in: if the caller speaks mid-sentence, the outbound audio queue clears within 50ms.'
     ],
     latencyBudget: {
@@ -44,7 +44,7 @@ export const ARCHITECTURE_NODES = [
       segments: [
         { label: 'Endpointing / VAD silence detect', ms: 260, pct: 42, color: '#d99b43' },
         { label: 'Streaming STT finalize', ms: 160, pct: 26, color: '#8f96a3' },
-        { label: 'ElevenLabs ulaw_8000 first byte', ms: 200, pct: 32, color: '#3fa67b' }
+        { label: 'ElevenLabs v4 Turbo first byte', ms: 200, pct: 32, color: '#3fa67b' }
       ]
     },
     invariantTone: 'emerald',
@@ -55,15 +55,15 @@ export const ARCHITECTURE_NODES = [
     id: 'router',
     step: '03 / HARD GATE',
     title: 'Caller-ID Lane Router',
-    shortSub: 'Deterministic E.164 allowlist gate executed in code before any prompt, memory file, or tool is loaded.',
-    badge: 'Deterministic Gate',
+    shortSub: 'Deterministic E.164 allowlist gate executed in code before any prompt, Markdown memory file, or tool is loaded.',
+    badge: 'Two-Lane Isolation',
     badgeTone: 'emerald',
     lane: 'shared',
     protocol: 'In-Process E.164 Exact-Match Check -> Process Context Isolation',
     tradeoffs: [
       'Identity routing is an explicit code branch, never a prompt instruction, eliminating prompt-injection escalation from untrusted callers.',
-      'Loads two physically separate system prompts and tool registries: an allowlist miss never mounts personal memory paths.',
-      'Adds sub-millisecond overhead while allowing one phone number to serve both personal command execution and public receptionist duties.'
+      'Loads two physically separate system prompts and tool registries: an allowlist miss never mounts persistent personal Markdown memory.',
+      'Adds sub-millisecond overhead while allowing one phone number to serve both sovereign owner execution and a sandboxed public reception desk.'
     ],
     latencyBudget: {
       total: '< 2 ms',
@@ -79,22 +79,22 @@ export const ARCHITECTURE_NODES = [
   },
   {
     id: 'owner',
-    step: '04A / PRIVATE EXECUTION',
-    title: 'Owner Lane',
-    shortSub: '2s fast-path Markdown recall, multi-harness CLI waterfall, and 16s background-to-Telegram handoff.',
-    badge: 'Full Brain + Handoff',
+    step: '04A / SOVEREIGN EXECUTION',
+    title: 'Owner Lane & Cross-Harness Brain',
+    shortSub: '2s persistent Markdown recall, Drive-as-bus sync across Antigravity/Claude/Codex, multi-model CLI failover, and Telegram approval gate.',
+    badge: 'Full Brain + Gate',
     badgeTone: 'amber',
     lane: 'owner',
     subItems: [
-      '2.0s fast-path local Markdown memory recall',
-      'Multi-harness CLI waterfall (flat-rate subscriptions)',
-      '16s voice cutoff -> async Telegram completion'
+      '2.0s fast-path persistent Markdown memory recall',
+      'Drive-as-bus sync across Antigravity, Claude & Codex',
+      'Multi-model CLI failover + 16s Telegram handoff & approval gate'
     ],
-    protocol: 'Local Markdown Index -> CLI Harness Waterfall -> Telegram Bot Async Dispatch',
+    protocol: 'Persistent Markdown Brain (Drive Bus) -> Multi-Model CLI Failover -> Telegram Approval Gate',
     tradeoffs: [
-      'Answers routine factual lookups (schedules, notes, tasks) in ~2.0s from plain Markdown files without waiting on heavy agentic loops.',
-      'Uses a multi-harness CLI waterfall over existing flat-rate subscriptions so zero per-token API charges accumulate and single-vendor limits never stall a call.',
-      'Enforces a 16-second voice wall-clock budget: complex research or multi-file tasks acknowledge verbally, detach to background, and deliver full results to Telegram.'
+      'Answers routine factual lookups (schedules, notes, tasks) in ~2.0s from plain Markdown files synced over Google Drive across Antigravity, Claude, and Codex.',
+      'Uses multi-model CLI failover across existing flat-rate subscriptions so zero per-token API charges accumulate and single-vendor quota caps never stall a run.',
+      'Enforces a 16-second voice wall-clock budget: deep research or code tasks acknowledge verbally, detach to the Linux node, and deliver results or approval prompts to Telegram.'
     ],
     latencyBudget: {
       total: '2.0s fast / 16s handoff',
@@ -105,7 +105,7 @@ export const ARCHITECTURE_NODES = [
     },
     invariantTone: 'amber',
     invariant:
-      'Destructive, financial, or outbound third-party actions still require explicit confirmation via the Telegram approval gate; voice alone cannot trigger irreversible side effects.'
+      'Unattended background units run behind a strict Telegram approval gate: destructive, financial, or irreversible outbound actions stage first and execute only after explicit owner confirmation.'
   },
   {
     id: 'public',
@@ -147,28 +147,28 @@ export const CALLER_SCENARIOS = [
     tone: 'amber',
     callerId: '+91 90000 00001 (E.164 Allowlist Match)',
     lane: 'OWNER LANE',
-    executionPolicy: '2s Fast-Path + Multi-Harness CLI Waterfall + Telegram Handoff',
+    executionPolicy: '2s Fast-Path + Multi-Model CLI Failover + Telegram Approval Gate',
     maxVoiceBudget: '16.0s before async Telegram handoff',
     multilingual: false,
     allowedData: [
-      'Personal Markdown memory cards & project notes',
-      'Active task list and timed calendar reminders',
-      'Multi-harness CLI execution on synced workspace',
-      'Async background job dispatch to Telegram'
+      'Persistent Markdown memory cards & project notes synced via Drive',
+      'Cross-harness state shared live across Antigravity, Claude, and Codex',
+      'Multi-model CLI failover execution on the 24/7 Linux node',
+      'Async background job dispatch & approval prompts to Telegram'
     ],
     blockedFields: [
-      'Unapproved financial transfers or billing changes',
-      'Bulk outbound messages without explicit confirmation',
+      'Unapproved financial transfers or billing changes (Telegram gate)',
+      'Bulk outbound messages or destructive commands without confirmation',
       'Raw secret dumps spoken aloud over PSTN audio'
     ],
     transcripts: {
       en: [
-        { time: '00:00.2', speaker: 'ROUTER', type: 'system', text: 'Caller-ID +91 90000 00001 matched OWNER_ALLOWLIST. Binding Owner Lane (fast-path + CLI waterfall).' },
+        { time: '00:00.2', speaker: 'ROUTER', type: 'system', text: 'Caller-ID +91 90000 00001 matched OWNER_ALLOWLIST. Binding Owner Lane (Markdown recall + multi-model CLI failover).' },
         { time: '00:00.9', speaker: 'ASSISTANT', type: 'assistant', text: 'Ready. What do you need?' },
         { time: '00:03.4', speaker: 'OWNER', type: 'caller', text: 'Check what is pending on the voice bridge sprint, and also draft a short summary of last week benchmarks to Telegram.' },
         { time: '00:05.3', speaker: 'FAST-PATH', type: 'system', text: 'Local Markdown index hit in 1.9s (projects/voice-bridge/current.md). Deep summary queued to background worker (est. >16s).' },
         { time: '00:05.6', speaker: 'ASSISTANT', type: 'assistant', text: 'Two items are open on the voice bridge sprint: Plivo fallback timeout tuning and the ElevenLabs greeting cache. I am compiling the benchmark summary in the background and will drop it in Telegram shortly.' },
-        { time: '00:14.2', speaker: 'HANDOFF', type: 'system', text: 'Voice turn complete under 16s ceiling. Background CLI harness continues asynchronously -> Telegram delivery confirmed.' }
+        { time: '00:14.2', speaker: 'HANDOFF', type: 'system', text: 'Voice turn complete under 16s ceiling. Background CLI harness continues asynchronously -> Drive sync & Telegram delivery confirmed.' }
       ]
     }
   },
@@ -195,7 +195,7 @@ export const CALLER_SCENARIOS = [
     transcripts: {
       en: [
         { time: '00:00.2', speaker: 'ROUTER', type: 'system', text: 'Caller-ID +91 90000 00042 not in allowlist. Binding Public Desk Lane (0 tools, public profile only).' },
-        { time: '00:01.0', speaker: 'ASSISTANT', type: 'assistant', text: 'Hello, this is Mohammed KM assistant desk. He is currently unavailable. How can I help?' },
+        { time: '00:01.0', speaker: 'ASSISTANT', type: 'assistant', text: 'Hello? Yes, speaking for Mohammed\'s desk. He\'s tied up at the moment. Feel free to share your name and what the call is about.' },
         { time: '00:04.2', speaker: 'CALLER', type: 'caller', text: 'Hi, Aarav here from courier logistics. I have a parcel for Mohammed. Can you share the flat number or OTP?' },
         { time: '00:05.1', speaker: 'GUARD', type: 'system', text: 'Detected sensitive field request (unit address / OTP). Policy: refuse politely, provide public security-desk drop rule.' },
         { time: '00:05.4', speaker: 'ASSISTANT', type: 'assistant', text: 'I cannot share flat details or OTPs on this line. Please leave standard parcels at the main gate security desk, or tell me if an OTP is mandatory and I will notify Mohammed to call you back.' },
@@ -254,7 +254,7 @@ export const CALLER_SCENARIOS = [
     transcripts: {
       en: [
         { time: '00:00.2', speaker: 'ROUTER', type: 'system', text: 'Caller-ID +91 90000 00088 not in allowlist. Binding Public Desk Lane (0 tools).' },
-        { time: '00:01.0', speaker: 'ASSISTANT', type: 'assistant', text: 'Hello, you have reached Mohammed KM assistant desk. He is currently unavailable. May I take a message?' },
+        { time: '00:01.0', speaker: 'ASSISTANT', type: 'assistant', text: 'Hello? Yes, speaking for Mohammed\'s desk. He\'s tied up at the moment. Feel free to share your name and what the call is about, and I\'ll pass the note along to him right away.' },
         { time: '00:04.8', speaker: 'CALLER', type: 'caller', text: 'Hi, this is Priya from the Systems Builders Forum. We wanted to check if Mohammed is free next Thursday afternoon for a panel.' },
         { time: '00:05.7', speaker: 'GUARD', type: 'system', text: 'Calendar read/write is unmounted in Public Desk Lane. Capturing structured inquiry without confirming availability.' },
         { time: '00:06.0', speaker: 'ASSISTANT', type: 'assistant', text: 'Thanks Priya. I do not have access to his live calendar on this line, but I will pass along the Systems Builders Forum panel invite for next Thursday afternoon. What is the best email or time for him to follow up?' },
@@ -308,7 +308,7 @@ export const CALLER_SCENARIOS = [
     transcripts: {
       en: [
         { time: '00:00.2', speaker: 'ROUTER', type: 'system', text: 'Caller-ID +91 14000 00099 not in allowlist. Binding Public Desk Lane (0 tools).' },
-        { time: '00:01.0', speaker: 'ASSISTANT', type: 'assistant', text: 'Hello, this is the assistant desk. How can I help?' },
+        { time: '00:01.0', speaker: 'ASSISTANT', type: 'assistant', text: 'Hello? Yes, speaking for Mohammed\'s desk. How can I help?' },
         { time: '00:03.9', speaker: 'CALLER', type: 'caller', text: 'Congratulations! You have been pre-approved for a zero-fee credit card upgrade and personal loan offer...' },
         { time: '00:04.4', speaker: 'GUARD', type: 'system', text: 'Classified as promotional solicitation. Triggering cached ulaw_8000 decline clip (0 TTS tokens) and immediate hangup.' },
         { time: '00:04.6', speaker: 'ASSISTANT', type: 'assistant', text: 'Thank you, we are not interested in promotional offers. Goodbye.' },
@@ -320,12 +320,12 @@ export const CALLER_SCENARIOS = [
 
 export const COST_ROWS = [
   {
-    layer: 'Reasoning & Coding Harnesses',
-    implementation: 'Multi-harness CLI waterfall over existing flat-rate subscriptions',
+    layer: 'Multi-Model CLI Failover',
+    implementation: 'Antigravity, Claude, and Codex CLI waterfall over existing flat-rate subscriptions',
     costTag: '$0 incremental',
     costTone: 'emerald',
     discipline:
-      'Zero per-token API metering. Routine lookups resolve in 2.0s via local Markdown search; deeper work cascades across flat-rate CLIs without runaway token bills.'
+      'Zero per-token API metering. Routine lookups resolve in 2.0s via local Markdown search; deeper work fails over cleanly across flat-rate CLIs without runaway token bills.'
   },
   {
     layer: 'Telephony DID & PSTN Minutes',
@@ -336,47 +336,48 @@ export const COST_ROWS = [
       'Single DID serves both Owner and Public Desk. Spam calls terminate in <12s and complex owner tasks detach to Telegram at 16s so PSTN minutes stay minimal.'
   },
   {
-    layer: 'Voice Synthesis (TTS)',
-    implementation: 'ElevenLabs streaming in native ulaw_8000 format',
+    layer: 'Cloned-Voice Synthesis (TTS)',
+    implementation: 'ElevenLabs v4 Turbo streaming in native 8 kHz ulaw_8000 format',
     costTag: 'Usage-capped',
     costTone: 'amber',
     discipline:
       'Three hard efficiency guards: 45-word per-turn response cap, pre-cached ulaw_8000 clips for greetings/declines, and instant barge-in cancellation on caller interruption.'
   },
   {
-    layer: 'Cloud Hosting & Memory Store',
-    implementation: 'Co-located on existing always-on Linux VPS + plain Markdown synced via Drive',
+    layer: '24/7 Linux Node & Drive-as-Bus Memory',
+    implementation: 'Co-located on a single always-on Linux VPS + persistent Markdown synced via Google Drive',
     costTag: '0 INR extra',
     costTone: 'emerald',
     discipline:
-      'No managed vector database, no serverless cold-start fees, and no separate voice-platform SaaS subscription. Plain files stay portable across any machine.'
+      'No managed vector database, no serverless cold-start fees, and no separate voice-platform SaaS subscription. Plain Markdown stays portable across every harness and machine.'
   },
   {
-    layer: 'Async Overflow & Approval Gate',
-    implementation: 'Telegram Bot API for >16s task completion & owner approvals',
+    layer: 'Unattended Approval Gate & Overflow',
+    implementation: 'Telegram Bot API for >16s task completion & owner approval gating',
     costTag: '$0 / mo',
     costTone: 'emerald',
     discipline:
-      'Moves long-running research, code edits, and structured call summaries off metered voice minutes onto free, searchable text threads.'
+      'Moves long-running research, code edits, structured call summaries, and risky-action approvals off metered voice minutes onto free, auditable text threads.'
   }
 ];
 
 export const STARTER_FILES = [
   {
-    path: 'mkm-starter/',
+    path: 'digital-brain/',
     isFolder: true,
-    note: 'portable workspace root'
+    note: 'portable Drive-synced root'
   },
   {
     path: '  memory/main.md',
     isFolder: false,
-    note: 'owner fast-path index',
-    content: `# Owner Memory Index (Synthetic Template)
+    note: 'persistent owner index',
+    content: `# Digital Brain Memory Index (Synthetic Template)
+# Synced via Drive-as-bus across Antigravity, Claude, and Codex.
 # Loaded ONLY inside the verified Owner Lane.
 
 ## Active Focus
-- Voice Bridge: Plivo ulaw_8000 stream + 16s Telegram handoff
-- Weekly cadence: review open tasks every Sunday evening
+- Voice Bridge: Plivo ulaw_8000 + ElevenLabs v4 Turbo + 16s Telegram handoff
+- Cross-Harness Sync: Single Linux node <-> desktop via Google Drive
 
 ## Routing Map
 - Projects: projects/<slug>/current.md
@@ -400,7 +401,7 @@ export const STARTER_FILES = [
     isFolder: false,
     note: 'deterministic E.164 gate',
     content: `// Deterministic Caller-ID Lane Router
-// Enforced in code before any prompt or tool registry is loaded.
+// Enforced in code before any prompt, memory file, or tool registry is loaded.
 
 const OWNER_ALLOWLIST = new Set(
   (process.env.OWNER_E164_ALLOWLIST || '')
@@ -421,7 +422,7 @@ export function resolveLane(callerE164) {
     path: '  voice-bridge/server.js',
     isFolder: false,
     note: 'Plivo ulaw_8000 WS server',
-    content: `// Minimal Plivo ulaw_8000 WebSocket Voice Bridge
+    content: `// Minimal Plivo ulaw_8000 + ElevenLabs v4 Turbo Voice Bridge
 import { resolveLane } from '../lanes/router.js';
 
 export function onStreamStart(meta) {
@@ -430,10 +431,12 @@ export function onStreamStart(meta) {
   return {
     codec: 'audio/x-mulaw',
     sampleRate: 8000,
+    ttsModel: 'eleven_turbo_v2_5',
     lane: route.lane,
     maxWordsPerTurn: 45,
     handoffChannel: route.lane === 'owner' ? 'telegram' : 'summary-queue',
-    tools: route.toolsEnabled ? ['markdown_recall', 'cli_waterfall'] : []
+    approvalGate: route.lane === 'owner' ? 'telegram-confirm' : 'disabled',
+    tools: route.toolsEnabled ? ['markdown_recall', 'cli_failover'] : []
   };
 }`
   },
@@ -449,11 +452,11 @@ PLIVO_DID=+910000000000
 # Comma-separated E.164 numbers allowed into Owner Lane
 OWNER_E164_ALLOWLIST=+919000000001
 
-# ElevenLabs (ulaw_8000 output mode)
+# ElevenLabs v4 Turbo (native ulaw_8000 output mode)
 ELEVENLABS_API_KEY=your_elevenlabs_key
-ELEVENLABS_VOICE_ID=your_voice_id
+ELEVENLABS_VOICE_ID=your_cloned_voice_id
 
-# Telegram async handoff target
+# Telegram async handoff & unattended approval gate
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 TELEGRAM_OWNER_CHAT_ID=your_numeric_chat_id`
   }
@@ -462,31 +465,31 @@ TELEGRAM_OWNER_CHAT_ID=your_numeric_chat_id`
 export const SETUP_STEPS = [
   {
     num: 'STEP 01',
-    title: 'Initialize the Plain-Text Markdown Brain',
-    desc: 'Create separate directories for private owner memory and the single read-only public profile. Keep everything in versionable Markdown with zero database dependencies.',
-    cmd: 'mkdir -p mkm-starter/{memory,lanes,voice-bridge,config} && cp config/.env.example .env'
+    title: 'Initialize the Persistent Markdown Brain & Drive Bus',
+    desc: 'Create separate directories for private owner memory and the single read-only public profile. Sync the root over Google Drive so Antigravity, Claude, and Codex share identical context across desktop and your Linux node.',
+    cmd: 'mkdir -p digital-brain/{memory,lanes,voice-bridge,config} && cp config/.env.example .env'
   },
   {
     num: 'STEP 02',
-    title: 'Lock the Caller-ID Allowlist Boundary',
+    title: 'Lock the Two-Lane Caller-ID Boundary',
     desc: 'Populate OWNER_E164_ALLOWLIST in .env with your verified E.164 number. Confirm that unknown callers resolve to toolsEnabled: false before starting the bridge.',
     cmd: 'node -e "import(\'./lanes/router.js\').then(m => console.log(m.resolveLane(\'+919000000099\')))"'
   },
   {
     num: 'STEP 03',
-    title: 'Point Plivo DID to Native ulaw_8000 Stream',
-    desc: 'Configure your Plivo Answer URL to return a <Stream> XML directive with contentType="audio/x-mulaw;rate=8000" pointing to your HTTPS/WSS bridge endpoint.',
-    cmd: 'curl -s https://your-domain.example/voice/answer | grep "audio/x-mulaw;rate=8000"'
+    title: 'Point Plivo DID to Native 8 kHz ulaw Stream',
+    desc: 'Configure your Plivo Answer URL to return a <Stream> XML directive with contentType="audio/x-mulaw;rate=8000" pointing to your single Linux node WSS endpoint.',
+    cmd: 'curl -s https://your-node.example/voice/answer | grep "audio/x-mulaw;rate=8000"'
   },
   {
     num: 'STEP 04',
-    title: 'Wire CLI Waterfall & 16s Telegram Handoff',
-    desc: 'Connect your local flat-rate CLI harnesses behind a 2.0s Markdown fast-path. Any owner request exceeding 16s acknowledges by voice and completes asynchronously in Telegram.',
-    cmd: 'node voice-bridge/server.js --fast-path-ms=2000 --handoff-ms=16000'
+    title: 'Wire Multi-Model CLI Failover & Approval Gate',
+    desc: 'Connect your flat-rate CLI harnesses behind a 2.0s Markdown fast-path. Requests exceeding 16s hand off to Telegram; unattended outbound or risky actions wait for explicit Telegram approval.',
+    cmd: 'node voice-bridge/server.js --fast-path-ms=2000 --handoff-ms=16000 --approval-gate=telegram'
   },
   {
     num: 'STEP 05',
-    title: 'Verify Isolation & Cached TTS Guards',
+    title: 'Verify Isolation & Cloned-Voice TTS Guards',
     desc: 'Run a dry-run test across Owner, Delivery, Networking, and Spam profiles to assert zero tool leakage, 45-word turn caps, and pre-cached decline clips.',
     cmd: 'npm run verify:lanes && npm run verify:tts-cache'
   }

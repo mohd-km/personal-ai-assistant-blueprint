@@ -1,8 +1,8 @@
 {
-  "name": "personal-ai-assistant-blueprint",
-  "version": "1.0.0",
+  "name": "digital-brain-architecture",
+  "version": "2.0.0",
   "private": true,
-  "description": "Interactive editorial showcase of the Personal AI Assistant Blueprint by Mohammed KM.",
+  "description": "Digital Brain Architecture — sovereign, cross-harness digital brain showcase by Mohammed KM.",
   "type": "module",
   "scripts": {
     "dev": "vite",
