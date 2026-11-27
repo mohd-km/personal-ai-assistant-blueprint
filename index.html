@@ -36,67 +36,21 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/src/styles/main.css" />
+      <link rel="stylesheet" href="/src/mkm-topbar.css" />
   </head>
   <body>
     <div class="progress-bar" id="reading-progress" aria-hidden="true"></div>
 
-    <header class="site-header">
-      <div class="container header-inner">
-        <a href="#top" class="brand">
-          <span class="brand-mark" aria-hidden="true">
-            <svg
-              class="brand-mark-svg"
-              viewBox="0 0 28 28"
-              width="28"
-              height="28"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <rect
-                x="1"
-                y="1"
-                width="26"
-                height="26"
-                rx="6.5"
-                fill="#ffffff"
-                stroke="#111111"
-                stroke-width="1.35"
-              />
-              <circle cx="14" cy="14" r="2.75" fill="#111111" />
-              <line
-                x1="14"
-                y1="6.25"
-                x2="14"
-                y2="11.25"
-                stroke="#111111"
-                stroke-width="1.35"
-                stroke-linecap="round"
-              />
-              <line
-                x1="7.4"
-                y1="18.6"
-                x2="11.65"
-                y2="15.6"
-                stroke="#111111"
-                stroke-width="1.35"
-                stroke-linecap="round"
-              />
-              <line
-                x1="20.6"
-                y1="18.6"
-                x2="16.35"
-                y2="15.6"
-                stroke="#111111"
-                stroke-width="1.35"
-                stroke-linecap="round"
-              />
-              <circle cx="14" cy="6.25" r="1.5" fill="#111111" />
-              <circle cx="7.4" cy="18.6" r="1.5" fill="#111111" />
-              <circle cx="20.6" cy="18.6" r="1.5" fill="#111111" />
-            </svg>
+    <header class="mkm-topbar">
+      <div class="mkm-topbar-inner">
+        <div class="mkm-brand">
+          <span class="mkm-brand-mark" aria-hidden="true">
+            <img src="/favicon.png?v=2" alt="" width="28" height="28" />
           </span>
-          <span class="brand-title">Digital Brain Architecture</span>
-        </a>
+          <span class="mkm-brand-name">Digital Brain Architecture</span>
+          <span class="mkm-brand-sep" aria-hidden="true"></span>
+          <span class="mkm-brand-by">Mohammed KM</span>
+        </div>
 
         <button
           type="button"
@@ -138,8 +92,6 @@
       <section class="hero section">
         <div class="container">
           <div class="eyebrow">
-            <span>MOHAMMED KM</span>
-            <span class="sep" aria-hidden="true">/</span>
             <span>DIGITAL BRAIN BLUEPRINT</span>
           </div>
 

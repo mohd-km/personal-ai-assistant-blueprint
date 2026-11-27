@@ -1,0 +1,116 @@
+/* MKM uniform project topbar (AI Voice Desk template). Same block in every public project. */
+.mkm-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e5e5e3;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  text-align: left;
+}
+.mkm-topbar-inner {
+  box-sizing: border-box;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 14px 28px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+}
+@media (max-width: 640px) {
+  .mkm-topbar-inner { padding: 12px 16px; }
+}
+.mkm-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.mkm-brand-mark {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  border: 1.4px solid #111111;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.mkm-brand-mark img {
+  width: 24px;
+  height: 24px;
+  max-width: none;
+  object-fit: contain;
+  display: block;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+.mkm-brand-name {
+  font-family: 'Caudex', Georgia, serif;
+  font-weight: 700;
+  font-size: 17.6px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: #111111;
+  text-transform: none;
+  min-width: 0;
+}
+.mkm-brand-sep {
+  width: 1px;
+  height: 14px;
+  background: #d4d4d0;
+  flex-shrink: 0;
+}
+.mkm-brand-by {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13.1px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #555555;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+/* Narrow screens: long names wrap evenly and "| Mohammed KM" stays one unit after the last word */
+@media (max-width: 640px) {
+  .mkm-brand {
+    display: block;
+    position: relative;
+    padding-left: 38px;
+    min-height: 28px;
+    font-size: 0;
+    text-wrap: balance;
+  }
+  .mkm-brand-mark {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .mkm-brand-name {
+    display: inline;
+    line-height: 1.3;
+  }
+  .mkm-brand-sep {
+    display: none;
+  }
+  .mkm-brand-by {
+    display: inline-block;
+    line-height: 1.3;
+    margin-left: 10px;
+    padding-left: 11px;
+    background: linear-gradient(#d4d4d0, #d4d4d0) left center / 1px 14px no-repeat;
+  }
+}

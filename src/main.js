@@ -545,7 +545,7 @@ function runPacketSimulation(commandId) {
   renderNodeInspector();
 
   const stepFrame = (now) => {
-    const dt = Math.min(0.06, (now - state.lastFrameTs) / 1000);
+    const dt = Math.max(0, Math.min(0.06, (now - state.lastFrameTs) / 1000));
     state.lastFrameTs = now;
 
     // 1.35 hops per second at 1x speed
