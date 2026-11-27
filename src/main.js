@@ -405,11 +405,11 @@ function renderTelemetryAndGate() {
     0
   );
 
-  let statusText = `HOP 0${state.currentHopIndex + 1} / 05`;
+  let statusText = `STOP ${state.currentHopIndex + 1} OF 5`;
   let statusClass = 'is-accent';
   if (reachedEnd) {
     if (scenario.needsApproval && state.approvalState === 'pending') {
-      statusText = 'PAUSED AT GATE';
+      statusText = 'WAITING FOR YOUR OK';
       statusClass = 'is-warn';
     } else if (scenario.needsApproval && state.approvalState === 'cancelled') {
       statusText = 'SAFELY CANCELLED';
@@ -423,21 +423,22 @@ function renderTelemetryAndGate() {
   if (telemetryEl) {
     telemetryEl.innerHTML = `
       <div class="telemetry-cell">
-        <div class="telemetry-label">Active Model</div>
+        <div class="telemetry-label">AI app on duty</div>
         <div class="telemetry-val ${activeProvider ? 'is-ok' : 'is-warn'}">
           ${activeProvider ? escapeHtml(activeProvider.name) : 'All Offline'}
         </div>
       </div>
       <div class="telemetry-cell">
-        <div class="telemetry-label">Packet State</div>
+        <div class="telemetry-label">Where the request is</div>
         <div class="telemetry-val ${statusClass}">${escapeHtml(statusText)}</div>
       </div>
       <div class="telemetry-cell">
-        <div class="telemetry-label">Route Latency</div>
+        <div class="telemetry-label">Travel time so far (latency)</div>
         <div class="telemetry-val">${totalMs} ms</div>
+        <div class="telemetry-note">ms = thousandths of a second; example timings</div>
       </div>
       <div class="telemetry-cell">
-        <div class="telemetry-label">Extra API Cost</div>
+        <div class="telemetry-label">Pay-per-use cost</div>
         <div class="telemetry-val is-ok">$0.00</div>
       </div>
     `;
@@ -449,8 +450,8 @@ function renderTelemetryAndGate() {
     drawerEl.hidden = false;
     drawerEl.innerHTML = `
       <div class="approval-head">
-        <h3 class="approval-title">Approval Gate — Waiting for Your Decision</h3>
-        <span class="step-pill pill-warn">OUTWARD ACTION PAUSED</span>
+        <h3 class="approval-title">Approval gate: waiting for your decision</h3>
+        <span class="step-pill pill-warn">EMAIL ON HOLD</span>
       </div>
       <div class="approval-draft">
         <p><strong>To:</strong> ${escapeHtml(scenario.draftPreview.to)}</p>
@@ -507,13 +508,13 @@ function renderNodeInspector() {
 
   inspector.innerHTML = `
     <div class="inspector-top">
-      <h3 class="inspector-title">Hop 0${node.index + 1}: ${escapeHtml(node.shortLabel)} &mdash; ${escapeHtml(node.role)}</h3>
-      <span class="step-pill pill-neutral">${node.latencyMs > 0 ? `${node.latencyMs} ms hop` : 'Human gate'}</span>
+      <h3 class="inspector-title">Stop ${node.index + 1}: ${escapeHtml(node.shortLabel)}, ${escapeHtml(node.role)}</h3>
+      <span class="step-pill pill-neutral">${node.latencyMs > 0 ? `about ${node.latencyMs} ms here` : 'Waits for you'}</span>
     </div>
     <p class="inspector-payload">${escapeHtml(hopPayload)}</p>
     <p class="inspector-summary">${escapeHtml(node.summary)}</p>
     <details class="editorial-drawer">
-      <summary>Architecture note for ${escapeHtml(node.shortLabel)}</summary>
+      <summary>Why this stop matters</summary>
       <div class="drawer-body"><p>${escapeHtml(node.deepNote)}</p></div>
     </details>
   `;
@@ -710,7 +711,7 @@ function renderBlueprintBuilder() {
 
   if (gateBtn && gateLabel) {
     gateBtn.setAttribute('aria-checked', String(state.builder.approvalGate));
-    gateLabel.textContent = state.builder.approvalGate ? 'Enabled' : 'Manual';
+    gateLabel.textContent = state.builder.approvalGate ? 'On' : 'Off';
   }
 
   if (topologyEl) {
@@ -724,7 +725,7 @@ function renderBlueprintBuilder() {
       .join(' → ');
 
     topologyEl.innerHTML = `
-      ROUTE: <strong>Laptop</strong> &rarr; <strong>${escapeHtml(storageLabel)}</strong> &rarr; <strong>${escapeHtml(modelLabels)}</strong> &rarr; <strong>${escapeHtml(channelLabels)}</strong> &rarr; <strong>${state.builder.approvalGate ? 'Approval Gate' : 'Inline Confirm'}</strong>
+      YOUR SETUP: <strong>Laptop</strong> &rarr; <strong>${escapeHtml(storageLabel)}</strong> &rarr; <strong>${escapeHtml(modelLabels)}</strong> &rarr; <strong>${escapeHtml(channelLabels)}</strong> &rarr; <strong>${state.builder.approvalGate ? 'Approval gate' : 'Quick confirm in chat'}</strong>
     `;
   }
 
@@ -831,23 +832,23 @@ function renderFailover() {
 
   statusBar.innerHTML = `
     <div class="status-tile">
-      <div class="status-tile-label">Active Assistant</div>
+      <div class="status-tile-label">AI app on duty</div>
       <div class="status-tile-value ${active ? 'is-ok' : 'is-warn'}">
         ${active ? escapeHtml(active.name) : 'Paused'}
       </div>
       <p class="status-tile-note">
-        ${active ? (active.priority === 1 ? 'Primary handling requests.' : `Failover active — ${active.name} took over.`) : 'All providers toggled off.'}
+        ${active ? (active.priority === 1 ? 'First choice is handling requests.' : `Backup in use: ${active.name} took over.`) : 'All three are switched off.'}
       </p>
     </div>
     <div class="status-tile">
-      <div class="status-tile-label">Shared Memory</div>
-      <div class="status-tile-value is-ok">100% Intact</div>
+      <div class="status-tile-label">Shared notes</div>
+      <div class="status-tile-value is-ok">All there</div>
       <p class="status-tile-note">${onlineCount} online assistant${onlineCount === 1 ? '' : 's'} reading the same folder.</p>
     </div>
     <div class="status-tile">
-      <div class="status-tile-label">Extra API Spend</div>
+      <div class="status-tile-label">Pay-per-use cost</div>
       <div class="status-tile-value is-ok">$0</div>
-      <p class="status-tile-note">Flat-rate plans only — zero metered fallback.</p>
+      <p class="status-tile-note">Fixed monthly plans only, so switching costs nothing extra.</p>
     </div>
   `;
 
@@ -857,13 +858,13 @@ function renderFailover() {
 
     const cardClass = isServing ? 'is-serving' : !isOnline ? 'is-offline' : '';
     const pillClass = isServing ? 'pill-ok' : isOnline ? 'pill-neutral' : 'pill-block';
-    const badgeLabel = isServing ? 'ACTIVE NOW' : isOnline ? 'STANDBY' : 'OFFLINE';
+    const badgeLabel = isServing ? 'ACTIVE NOW' : isOnline ? 'READY AS BACKUP' : 'OFFLINE';
 
     return `
       <article class="provider-card ${cardClass}">
         <div>
           <div class="provider-top">
-            <span class="provider-priority">Priority 0${provider.priority}</span>
+            <span class="provider-priority">${provider.priority === 1 ? '1st choice' : provider.priority === 2 ? '2nd in line' : '3rd in line'}</span>
             <span class="step-pill ${pillClass}">${badgeLabel}</span>
           </div>
           <h3 class="provider-name">${escapeHtml(provider.name)}</h3>
@@ -947,12 +948,12 @@ function renderFolderExplorer() {
     <div class="folder-preview">
       <div class="folder-preview-bar">
         <span>${escapeHtml(activeFolder.sampleFile)}</span>
-        <span>PLAIN MARKDOWN</span>
+        <span>PLAIN TEXT (MARKDOWN)</span>
       </div>
       <pre><code>${escapeHtml(activeFolder.sampleContent)}</code></pre>
     </div>
     <details class="editorial-drawer">
-      <summary>Why ${escapeHtml(activeFolder.name)} outlasts locked-in chat histories</summary>
+      <summary>Why this beats a chat history</summary>
       <div class="drawer-body"><p>${escapeHtml(activeFolder.deepNote)}</p></div>
     </details>
   `;

@@ -1971,3 +1971,65 @@ button {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Plain-English story cards */
+.hero-sub {
+  margin: 12px 0 0;
+  max-width: 68ch;
+  color: var(--ink-secondary);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.story-card {
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: -12px 0 26px;
+  padding: 16px 18px;
+  border: 1px solid var(--accent-border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent-soft);
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.story-card p {
+  margin: 0 0 8px;
+}
+
+.story-card p:last-child {
+  margin-bottom: 0;
+}
+
+.story-beat {
+  display: inline-block;
+  margin-right: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.story-card code {
+  overflow-wrap: anywhere;
+}
+
+.telemetry-note {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--ink-muted);
+  line-height: 1.35;
+}
+
+@media (max-width: 767px) {
+  .story-card {
+    margin-top: -8px;
+    padding: 14px;
+    font-size: 14px;
+  }
+}

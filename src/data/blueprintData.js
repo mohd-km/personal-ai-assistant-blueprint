@@ -8,66 +8,66 @@ export const PIPELINE_NODES = [
     id: 'laptop',
     index: 0,
     shortLabel: 'Laptop',
-    subLabel: 'Local Workspace',
+    subLabel: 'Your computer',
     x: 92,
     y: 112,
     latencyMs: 12,
-    role: 'Capture & local edits',
-    summary: 'Reads plain Markdown cards locally and stages every command with zero vendor lock-in.',
+    role: 'where you type the request',
+    summary: 'Finds the notes that matter for this request, in plain text files on your own machine, not locked inside any one company\'s app.',
     deepNote:
-      'Your desktop or laptop is a replaceable client, not the single point of failure. Any editor or AI harness opens the same local folder and writes clean diffs directly to disk.'
+      'If your laptop breaks, nothing is lost: it is just one window onto the folder. Any text editor or AI app can open the same folder and save small, clear changes straight into it.'
   },
   {
     id: 'drive-bus',
     index: 1,
-    shortLabel: 'Drive Bus',
-    subLabel: 'One Sync Bus',
+    shortLabel: 'Shared folder',
+    subLabel: 'Copied everywhere',
     x: 274,
     y: 112,
     latencyMs: 140,
-    role: 'Single file transport',
-    summary: 'Syncs Markdown notes and state between laptop and cloud on one deterministic file bus.',
+    role: 'keeps every device in step',
+    summary: 'Copies the notes between your laptop and the cloud computer through one shared folder (for example Google Drive), so both always see the same thing.',
     deepNote:
-      'Using one shared sync bus eliminates fragile ad-hoc copies. Every machine converges on the same rules, memory cards, and execution trail within seconds.'
+      'One shared folder means no stray copies drifting apart. Within seconds every machine has the same rules, notes and log.'
   },
   {
     id: 'cloud',
     index: 2,
     shortLabel: 'Cloud',
-    subLabel: 'Always-On Node',
+    subLabel: 'Always switched on',
     x: 456,
     y: 112,
     latencyMs: 280,
-    role: 'Failover AI runtime',
-    summary: 'Runs the active flat-rate assistant (Antigravity, Claude, or Codex) even while your laptop sleeps.',
+    role: 'where the AI does the work',
+    summary: 'A computer in a data centre runs the AI app (Antigravity, Claude or Codex), so work carries on even while your laptop sleeps.',
     deepNote:
-      'The cloud worker mounts the same synced folder and follows the priority waterfall. If the primary model hits quota or goes offline, the next model resumes with zero lost context.'
+      'The cloud computer opens the same shared folder and tries the AI apps in order. If the first one reaches its usage limit or goes down, the next one picks up with the same notes, so nothing is forgotten.'
   },
   {
     id: 'telegram',
     index: 3,
     shortLabel: 'Telegram',
-    subLabel: 'Mobile Control',
+    subLabel: 'Your phone',
     x: 638,
     y: 112,
     latencyMs: 95,
-    role: 'Remote prompt & receipt',
-    summary: 'Delivers crisp mobile updates and carries your one-tap confirmation back to the cloud worker.',
+    role: 'sends you the result',
+    summary: 'Sends a short update to your phone through the Telegram chat app, and carries your one-tap answer back.',
     deepNote:
-      'Telegram acts as a lightweight control plane from your phone: short plain-text briefs, status pings, and explicit approval tokens—never noisy dashboards.'
+      'Your phone becomes a simple remote control: short plain messages, progress pings and yes or no buttons, instead of a busy dashboard.'
   },
   {
     id: 'approval-gate',
     index: 4,
     shortLabel: 'Approval Gate',
-    subLabel: 'Human Safety Lock',
+    subLabel: 'Waits for your OK',
     x: 820,
     y: 112,
     latencyMs: 0,
-    role: 'Outward action firewall',
-    summary: 'Auto-passes private notes and lookups; pauses every external email, message, or payment for your tap.',
+    role: 'the final safety check',
+    summary: 'Lets private notes and lookups through, but holds every email, message or payment to other people until you tap OK.',
     deepNote:
-      'Background tasks run under a restricted unattended flag. Any outward-facing tool is intercepted by the approval gate and cannot execute until you explicitly approve it.'
+      'Work that runs while you are away is limited to private tasks. Anything that would reach another person is stopped here and cannot happen until you say yes.'
   }
 ];
 
@@ -75,26 +75,26 @@ export const COMMAND_SCENARIOS = [
   {
     id: 'email',
     label: 'Send a client email',
-    category: 'Outward action',
+    category: 'Sends to someone',
     prompt: '"Email Alex at Studio North with the revised timeline and confirm Thursday at 3 PM."',
     preferredHarness: 'Claude',
     needsApproval: true,
-    packetTag: 'OUTWARD DRAFT',
+    packetTag: 'EMAIL TO SOMEONE',
     draftPreview: {
-      to: 'Alex — Studio North (synthetic contact)',
+      to: 'Alex, Studio North (made-up example)',
       subject: 'Updated timeline + Thursday 3 PM check-in',
       body: 'Hi Alex, sharing the updated two-week milestones below. Does Thursday at 3 PM still work to walk through them?'
     },
     hopDetails: {
       laptop: 'Matched rules/writing-tone.md + memory-cards/studio-north.md',
-      'drive-bus': 'Synced 2 context files (4.2 KB) across the bus',
-      cloud: 'Drafted concise reply using active flat-rate assistant',
-      telegram: 'Pushed draft preview + approve/cancel prompt to phone',
-      'approval-gate': 'PAUSED — outward email waits for explicit owner tap'
+      'drive-bus': 'Copied 2 relevant notes (4.2 KB, about a page of text) to the cloud computer',
+      cloud: 'The AI app on duty wrote a short draft reply',
+      telegram: 'Sent the draft to your phone with approve and cancel buttons',
+      'approval-gate': 'ON HOLD: the email waits until you tap approve'
     },
     outcomeApproved: {
       badge: 'SENT AFTER APPROVAL',
-      summary: 'Email dispatched only after your tap, with a one-line receipt appended to execution-trail/.',
+      summary: 'The email went out only after your tap, and a one-line receipt was added to the log folder (execution-trail).',
       detail: 'Delivered to Alex · logged to execution-trail/recent.md'
     },
     outcomeCancelled: {
@@ -110,13 +110,13 @@ export const COMMAND_SCENARIOS = [
     prompt: '"Book window seats on morning flights and aisle seats on flights over four hours."',
     preferredHarness: 'Antigravity',
     needsApproval: false,
-    packetTag: 'PRIVATE WRITE',
+    packetTag: 'PRIVATE NOTE',
     hopDetails: {
       laptop: 'Routed to existing memory-cards/travel.md (18 lines)',
-      'drive-bus': 'Mirrored 1-line diff (142 B) to cloud workspace',
-      cloud: 'Verified card format and updated shared index',
-      telegram: 'Silent completion — no mobile interruption needed',
-      'approval-gate': 'AUTO-PASSED — private note update, zero external sends'
+      'drive-bus': 'Copied the one changed line (142 bytes) to the cloud computer',
+      cloud: 'Checked the note is tidy and updated the notes index',
+      telegram: 'Finished quietly: no need to disturb your phone',
+      'approval-gate': 'PASSED: a private note, nothing sent to anyone'
     },
     outcomeApproved: {
       badge: 'SAVED EVERYWHERE',
@@ -131,18 +131,18 @@ export const COMMAND_SCENARIOS = [
     prompt: '"What is on my calendar today, and where is my cleanest 2-hour deep-work block?"',
     preferredHarness: 'Antigravity',
     needsApproval: false,
-    packetTag: 'READ-ONLY',
+    packetTag: 'LOOKUP ONLY',
     hopDetails: {
       laptop: 'Loaded rules/focus-hours.md + read-only calendar query',
-      'drive-bus': 'Checked latest focus rule checksum (in sync)',
+      'drive-bus': 'Confirmed the focus-hours note is the latest version',
       cloud: 'Computed open slots and ranked 2:00–4:30 PM top block',
       telegram: 'Returned 3-line plain-text brief in 2 seconds',
-      'approval-gate': 'AUTO-PASSED — read-only lookup cannot mutate state'
+      'approval-gate': 'PASSED: only reading, nothing can be changed'
     },
     outcomeApproved: {
       badge: 'CLEAR BRIEF',
       summary: 'Returns 3 meetings and flags 2:00 PM – 4:30 PM as your cleanest focus window.',
-      detail: 'Read-only · delivered in 2.0 s · $0 extra API cost'
+      detail: 'Only reading · answered in 2.0 s · $0 pay-per-use cost'
     }
   },
   {
@@ -152,13 +152,13 @@ export const COMMAND_SCENARIOS = [
     prompt: '"Compare three lightweight static hosts and leave a 1-page table by 7 AM."',
     preferredHarness: 'Codex',
     needsApproval: false,
-    packetTag: 'BACKGROUND JOB',
+    packetTag: 'OVERNIGHT JOB',
     hopDetails: {
-      laptop: 'Queued playbook playbooks/comparison-brief.md before sleep',
-      'drive-bus': 'Synced task brief to always-on cloud workspace',
-      cloud: 'Executed overnight comparison on flat-rate plan',
+      laptop: 'Picked the comparison recipe (playbooks/comparison-brief.md) before bed',
+      'drive-bus': 'Copied the task to the always-on cloud computer',
+      cloud: 'Did the comparison overnight on a fixed monthly plan',
       telegram: 'Sent 7:00 AM digest link to memory-cards/hosting-comparison.md',
-      'approval-gate': 'AUTO-PASSED — local research note, no outward side effects'
+      'approval-gate': 'PASSED: a private research note, nothing sent to anyone'
     },
     outcomeApproved: {
       badge: 'READY BY MORNING',
@@ -174,7 +174,7 @@ export const FAILOVER_PROVIDERS = [
     priority: 1,
     name: 'Antigravity',
     role: 'Primary everyday driver',
-    plan: 'Flat-rate plan',
+    plan: 'Fixed monthly plan',
     strength: 'Fast routing, daily notes, and interactive workspace work.'
   },
   {
@@ -182,7 +182,7 @@ export const FAILOVER_PROVIDERS = [
     priority: 2,
     name: 'Claude',
     role: 'First automatic backup',
-    plan: 'Flat-rate plan',
+    plan: 'Fixed monthly plan',
     strength: 'Writing, structured planning, and careful reasoning.'
   },
   {
@@ -190,7 +190,7 @@ export const FAILOVER_PROVIDERS = [
     priority: 3,
     name: 'Codex',
     role: 'Second automatic backup',
-    plan: 'Flat-rate plan',
+    plan: 'Fixed monthly plan',
     strength: 'Background builds, verification checks, and overnight runs.'
   }
 ];
@@ -200,7 +200,7 @@ export const BRAIN_FOLDERS = [
     id: 'rules',
     name: 'rules',
     path: 'brain/rules/',
-    tag: 'Shared behavior contract',
+    tag: 'How to behave',
     headline: 'One rulebook read by every assistant.',
     shortSummary: 'Write your tone, formatting, and safety boundaries once in plain Markdown.',
     deepNote:
@@ -217,9 +217,9 @@ export const BRAIN_FOLDERS = [
     id: 'memory-cards',
     name: 'memory cards',
     path: 'brain/memory-cards/',
-    tag: 'Durable personal facts',
+    tag: 'Facts about you',
     headline: 'One tidy card per topic, never buried.',
-    shortSummary: 'Editable plain-text cards replace unsearchable vendor chat histories.',
+    shortSummary: 'Short text cards you can edit, instead of facts lost in old chats.',
     deepNote:
       'Locked-in chat histories bury key facts under hundreds of old messages. Short Markdown cards let you inspect, edit, or delete any fact in seconds with any text editor.',
     sampleFile: 'memory-cards/travel.md',
@@ -234,9 +234,9 @@ export const BRAIN_FOLDERS = [
     id: 'lessons-learned',
     name: 'lessons learned',
     path: 'brain/lessons-learned/',
-    tag: 'Mistakes never repeated',
-    headline: 'Correct once, upgrade every model.',
-    shortSummary: 'Every fix saved here is automatically inherited by all connected assistants.',
+    tag: 'Mistakes not to repeat',
+    headline: 'Correct it once, every AI app learns.',
+    shortSummary: 'Every correction saved here is followed by all three AI apps.',
     deepNote:
       'In a normal chat app, correcting a mistake only fixes that single thread. Saving lessons in Markdown means Antigravity, Claude, and Codex all avoid the same error from that day forward.',
     sampleFile: 'lessons-learned/email-tone.md',
@@ -250,7 +250,7 @@ export const BRAIN_FOLDERS = [
     id: 'playbooks',
     name: 'playbooks',
     path: 'brain/playbooks/',
-    tag: 'Repeatable recipes',
+    tag: 'Step-by-step recipes',
     headline: 'Turn recurring work into checklists.',
     shortSummary: 'Store multi-step workflows once so any assistant runs the exact same format.',
     deepNote:
@@ -267,11 +267,11 @@ export const BRAIN_FOLDERS = [
     id: 'execution-trail',
     name: 'execution trail',
     path: 'brain/execution-trail/',
-    tag: 'Append-only receipts',
+    tag: 'A log of everything done',
     headline: 'One plain-text receipt per action.',
-    shortSummary: 'Know which assistant changed what, when, and why—with zero vendor lock-in.',
+    shortSummary: 'See which assistant changed what, and when, in a plain list.',
     deepNote:
-      'When work happens across scattered chat apps, you lose visibility into changes. One append-only trail records every update in plain text for instant auditability and easy rollback.',
+      'When work is spread over several chat apps you lose track of what changed. This log only ever gets new lines added, never edited, so you can always check what happened and undo it.',
     sampleFile: 'execution-trail/recent.md',
     sampleContent: `# Execution Trail
 
@@ -298,24 +298,24 @@ export const BLUEPRINT_OPTIONS = {
     {
       id: 'drive',
       label: 'Google Drive',
-      detail: 'Single sync bus across laptop and cloud'
+      detail: 'One shared folder for laptop and cloud'
     },
     {
       id: 'git',
       label: 'Git Repository',
-      detail: 'Versioned Markdown with full diff history'
+      detail: 'Keeps every past version of every note'
     },
     {
       id: 'hybrid',
       label: 'Drive + Git',
-      detail: 'Live Drive sync backed by Git snapshots'
+      detail: 'Drive for live copying, Git for saved versions'
     }
   ],
   models: [
     {
       id: 'antigravity',
       label: 'Antigravity',
-      detail: 'Primary interactive workspace driver'
+      detail: 'First choice for everyday work'
     },
     {
       id: 'claude',
@@ -325,7 +325,7 @@ export const BLUEPRINT_OPTIONS = {
     {
       id: 'codex',
       label: 'Codex',
-      detail: 'Background builds & overnight verification'
+      detail: 'Long jobs and overnight checks'
     }
   ]
 };

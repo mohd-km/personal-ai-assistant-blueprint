@@ -16,7 +16,7 @@
     <meta property="og:title" content="Digital Brain Architecture — Mohammed KM" />
     <meta
       property="og:description"
-      content="One shared folder of plain Markdown notes read by three AI assistants, with animated packet routing, automatic failover, and a custom starter-kit exporter."
+      content="One shared folder of plain Markdown notes read by three AI assistants, so they all remember you, with automatic backup between them and a starter kit you can download."
     />
     <meta property="og:image" content="https://brain.mohammed-km.in/og-card.png" />
     <meta property="og:image:width" content="1200" />
@@ -26,7 +26,7 @@
     <meta name="twitter:title" content="Digital Brain Architecture — Mohammed KM" />
     <meta
       name="twitter:description"
-      content="One shared folder of plain Markdown notes read by three AI assistants, with animated packet routing, automatic failover, and a custom starter-kit exporter."
+      content="One shared folder of plain Markdown notes read by three AI assistants, so they all remember you, with automatic backup between them and a starter kit you can download."
     />
     <meta name="twitter:image" content="https://brain.mohammed-km.in/og-card.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -95,7 +95,10 @@
 
           <h1 class="hero-title">Digital Brain Architecture</h1>
           <p class="hero-thesis">
-            One plain Markdown folder shared across Antigravity, Claude, and Codex&mdash;watch live packets route across your devices, test model failover, and export your own starter kit.
+            A blueprint for a personal AI assistant whose memory lives in one folder of plain text notes that you own. Three different AI apps (Antigravity, Claude and Codex) all read the same notes, so they all know your preferences, and if one stops working the next one carries on.
+          </p>
+          <p class="hero-sub">
+            Below you can follow one request on its journey, build your own starter files, switch an AI off to see the backup take over, and open the five note folders. Start with the first section: press <strong>Send a client email</strong>.
           </p>
 
           <div class="hero-bar">
@@ -104,30 +107,30 @@
               <a href="#blueprint-generator" class="btn btn-secondary">Export Starter Kit</a>
             </div>
             <div class="hero-metrics" aria-label="Architecture summary metrics">
-              <span class="metric-chip"><strong>5</strong> Hops</span>
-              <span class="metric-chip"><strong>3</strong> Models</span>
-              <span class="metric-chip"><strong>$0</strong> Extra API</span>
-              <span class="metric-chip"><strong>100%</strong> Client-Side</span>
+              <span class="metric-chip"><strong>5</strong> stops per request</span>
+              <span class="metric-chip"><strong>3</strong> AI apps, one memory</span>
+              <span class="metric-chip"><strong>$0</strong> pay-per-use fees</span>
+              <span class="metric-chip"><strong>100%</strong> runs in your browser</span>
             </div>
           </div>
 
           <details class="editorial-drawer hero-drawer">
-            <summary>Three design principles behind this architecture</summary>
+            <summary>Three ideas behind the design</summary>
             <div class="drawer-body pillars-grid">
               <article class="pillar-item">
                 <div class="pillar-kicker">01 &middot; PORTABLE MEMORY</div>
                 <h2 class="pillar-title">Plain files, not chat silos</h2>
-                <p>Preferences, lessons, and checklists live as readable Markdown files you own forever.</p>
+                <p>Preferences, lessons and checklists live as simple text files (Markdown) that you can open, edit and keep forever.</p>
               </article>
               <article class="pillar-item">
                 <div class="pillar-kicker">02 &middot; AUTOMATIC BACKUP</div>
-                <h2 class="pillar-title">Switch models with zero friction</h2>
+                <h2 class="pillar-title">Switch AI apps without starting over</h2>
                 <p>Antigravity, Claude, and Codex read the same folder. If one is offline, the next takes over.</p>
               </article>
               <article class="pillar-item">
                 <div class="pillar-kicker">03 &middot; HUMAN SAFETY GATE</div>
                 <h2 class="pillar-title">Private work runs; outward sends pause</h2>
-                <p>Notes and lookups finish automatically. External emails always pause for your explicit tap.</p>
+                <p>Notes and lookups finish on their own. Anything that leaves your hands, like an email, waits for your tap.</p>
               </article>
             </div>
           </details>
@@ -139,14 +142,21 @@
         <div class="container">
           <div class="section-head">
             <div>
-              <div class="section-kicker">SIMULATION 01 &mdash; LIVE PACKET ROUTER</div>
-              <h2 class="section-title">Laptop &rarr; Drive Bus &rarr; Cloud &rarr; Telegram &rarr; Approval Gate</h2>
+              <div class="section-kicker">PART 1 &mdash; FOLLOW ONE REQUEST</div>
+              <h2 class="section-title">The journey of a request, in five stops</h2>
             </div>
             <p class="section-desc">
-              Pick a request to launch an animated packet across all five hops, or click any node to inspect what happens there.
+              Laptop &rarr; shared folder &rarr; cloud computer &rarr; your phone &rarr; your OK. Click any stop on the diagram to see what happens there.
             </p>
           </div>
 
+          <div class="story-card">
+            <p><span class="story-beat">The problem</span>You ask an assistant to do something, but you cannot see where your words go or what stops it from sending an email you did not mean to send.</p>
+            <p><span class="story-beat">How it works</span>Each request (shown as a moving dot, called a packet) travels five stops. Your laptop finds the right notes, the shared folder copies them to an always-on cloud computer, an AI app there does the work, the result is sent to your phone on Telegram, and a final safety check (the approval gate) holds anything that would leave your hands until you agree.</p>
+            <p class="story-try"><span class="story-beat">Try this first</span>Press <strong>Send a client email</strong>. The dot stops at the last box and shows you the draft email with <strong>Approve &amp; Send</strong> and <strong>Cancel Send</strong>. Then try <strong>Remember travel preference</strong>: it passes straight through, because a private note needs no permission.</p>
+          </div>
+
+          
           <div class="command-grid" id="command-buttons" role="group" aria-label="Choose a sample command">
             <!-- Populated by src/main.js -->
           </div>
@@ -154,27 +164,27 @@
           <div class="router-workbench" id="router-workbench">
             <div class="router-toolbar">
               <div class="router-prompt-wrap">
-                <span class="step-pill pill-accent" id="packet-tag-pill">OUTWARD DRAFT</span>
+                <span class="step-pill pill-accent" id="packet-tag-pill">EMAIL TO SOMEONE</span>
                 <p class="trace-prompt" id="trace-prompt"></p>
               </div>
               <div class="router-controls">
                 <label class="speed-control" for="packet-speed">
-                  <span class="speed-label">Speed</span>
+                  <span class="speed-label">Animation speed</span>
                   <input type="range" id="packet-speed" min="0.5" max="2" step="0.5" value="1" />
                   <span class="speed-value" id="packet-speed-value">1.0x</span>
                 </label>
-                <button type="button" class="btn-ghost" id="replay-trace-btn">Replay Packet</button>
+                <button type="button" class="btn-ghost" id="replay-trace-btn">Replay request</button>
               </div>
             </div>
 
             <!-- CENTERPIECE ANIMATED CLICKABLE SVG PIPELINE -->
-            <div class="svg-stage" aria-label="Interactive five-hop packet routing diagram">
+            <div class="svg-stage" aria-label="Diagram of the five stops a request passes through">
               <svg
                 id="packet-svg"
                 class="packet-svg"
                 viewBox="0 0 912 224"
                 role="img"
-                aria-label="Animated packet routing from Laptop to Drive Bus, Cloud, Telegram, and Approval Gate"
+                aria-label="A request moving from Laptop to Shared folder, Cloud, Telegram and Approval Gate"
               >
                 <defs>
                   <pattern id="paper-grid" width="24" height="24" patternUnits="userSpaceOnUse">
@@ -211,19 +221,26 @@
         <div class="container">
           <div class="section-head">
             <div>
-              <div class="section-kicker">TOOL 02 &mdash; CUSTOM BLUEPRINT EXPORTER</div>
-              <h2 class="section-title">Build &amp; Export Your Starter Kit</h2>
+              <div class="section-kicker">PART 2 &mdash; MAKE YOUR OWN</div>
+              <h2 class="section-title">Build your starter kit</h2>
             </div>
             <p class="section-desc">
-              Choose your channels, storage bus, and models to generate a tailored <code>AGENTS.md</code> and <code>config.json</code> bundle&mdash;100% locally in your browser.
+              Pick your options and download three ready-made files. Nothing is uploaded: the files are made inside your browser.
             </p>
           </div>
 
+          <div class="story-card">
+            <p><span class="story-beat">The problem</span>Setting up an assistant like this from scratch means writing the rules and settings yourself, and most people do not know where to begin.</p>
+            <p><span class="story-beat">How it works</span>Your choices fill in three files. <code>AGENTS.md</code> is the instruction sheet every AI app reads first. <code>config.json</code> is a short settings file listing your apps, folder and phone channel. <code>memory/main.md</code> is the index page of your notes.</p>
+            <p class="story-try"><span class="story-beat">Try this first</span>Type your own name in <strong>Your name</strong>. The file preview on the right updates as you type. Then switch off <strong>Approval gate</strong> and watch the rule about sending emails change in <code>AGENTS.md</code>.</p>
+          </div>
+
+          
           <div class="builder-grid">
             <!-- LEFT: CONTROLS -->
             <div class="builder-controls" id="builder-controls">
               <div class="control-group">
-                <label class="control-label" for="owner-name-input">Owner Name</label>
+                <label class="control-label" for="owner-name-input">Your name</label>
                 <input
                   type="text"
                   id="owner-name-input"
@@ -235,24 +252,24 @@
               </div>
 
               <div class="control-group">
-                <div class="control-label">Channels <span class="control-hint">(pick one or both)</span></div>
+                <div class="control-label">Talk to it from <span class="control-hint">(chat apps on your phone, pick one or both)</span></div>
                 <div class="chip-grid" id="channel-options" role="group" aria-label="Select channels"></div>
               </div>
 
               <div class="control-group">
-                <div class="control-label">Storage Bus <span class="control-hint">(single source of truth)</span></div>
+                <div class="control-label">Where your notes live <span class="control-hint">(the one shared folder every device copies from)</span></div>
                 <div class="chip-grid" id="storage-options" role="radiogroup" aria-label="Select storage bus"></div>
               </div>
 
               <div class="control-group">
-                <div class="control-label">Models <span class="control-hint">(failover priority order)</span></div>
+                <div class="control-label">AI apps <span class="control-hint">(in backup order: if the first is down, the next takes over)</span></div>
                 <div class="chip-grid" id="model-options" role="group" aria-label="Select models"></div>
               </div>
 
               <div class="control-group control-inline">
                 <div>
-                  <div class="control-label">Human Approval Gate</div>
-                  <p class="control-sub">Pause external emails, messages &amp; payments for your tap.</p>
+                  <div class="control-label">Approval gate (ask me first)</div>
+                  <p class="control-sub">Hold emails, messages and payments until you tap OK.</p>
                 </div>
                 <button
                   type="button"
@@ -273,7 +290,7 @@
 
               <div class="export-actions">
                 <button type="button" class="btn btn-primary" id="download-zip-btn">
-                  Download Starter Bundle (.zip)
+                  Download all 3 files (.zip)
                 </button>
                 <button type="button" class="btn btn-secondary" id="download-agents-btn">
                   AGENTS.md
@@ -307,12 +324,12 @@
               <pre class="preview-code"><code id="preview-code-content"></code></pre>
 
               <details class="editorial-drawer preview-drawer">
-                <summary>How to use this starter kit in 3 minutes</summary>
+                <summary>How to use these files in 3 minutes</summary>
                 <div class="drawer-body">
                   <ol class="compact-steps">
-                    <li>Unzip <code>digital-brain-starter-kit.zip</code> into your chosen Drive or Git folder.</li>
-                    <li>Point your AI harnesses to read <code>AGENTS.md</code> and <code>memory/main.md</code> on startup.</li>
-                    <li>Add your first personal card inside <code>memory-cards/</code> and test one private note update.</li>
+                    <li>Unzip <code>digital-brain-starter-kit.zip</code> into your Google Drive folder or Git folder (a folder that keeps every past version).</li>
+                    <li>Tell each AI app you use to read <code>AGENTS.md</code> and <code>memory/main.md</code> when it starts.</li>
+                    <li>Write your first note in <code>memory-cards/</code>, then ask an assistant to update it.</li>
                   </ol>
                 </div>
               </details>
@@ -326,14 +343,21 @@
         <div class="container">
           <div class="section-head">
             <div>
-              <div class="section-kicker">SIMULATION 02 &mdash; ZERO DOWNTIME</div>
-              <h2 class="section-title">Break a Model</h2>
+              <div class="section-kicker">PART 3 &mdash; WHEN AN AI GOES DOWN</div>
+              <h2 class="section-title">Switch an AI off</h2>
             </div>
             <p class="section-desc">
-              Switch providers offline to watch the waterfall reroute live&mdash;both here and inside the Packet Router above.
+              The backup plan is called failover: when one AI app is unavailable, the next one in line takes over.
             </p>
           </div>
 
+          <div class="story-card">
+            <p><span class="story-beat">The problem</span>AI apps have outages and usage limits. If your assistant only works with one of them, it simply stops.</p>
+            <p><span class="story-beat">How it works</span>The three apps are lined up in order. Work goes to the first one that is switched on. Because all three read the same notes, the backup already knows everything and nothing has to be copied or re-explained. Each runs on a fixed monthly plan, so a switch adds no pay-per-use charges.</p>
+            <p class="story-try"><span class="story-beat">Try this first</span>Switch <strong>Antigravity</strong> to Offline. Claude moves to <strong>ACTIVE NOW</strong>, and the diagram in Part 1 shows Claude doing the work.</p>
+          </div>
+
+          
           <div class="failover-status-bar" id="failover-status-bar" aria-live="polite">
             <!-- Populated by src/main.js -->
           </div>
@@ -344,18 +368,18 @@
 
           <div class="failover-empty-banner" id="failover-empty-banner" hidden>
             <p class="failover-empty-text">
-              All three assistants are switched off. Your Markdown notes stay safe on disk with $0 spent until any provider returns.
+              All three assistants are switched off. Your notes stay safe in the folder, and nothing is charged, until any of them comes back.
             </p>
             <button type="button" class="btn btn-primary" id="restore-providers-btn">
-              Restore All Providers
+              Switch all back on
             </button>
           </div>
 
           <details class="editorial-drawer section-drawer">
-            <summary>Why flat-rate failover avoids surprise API bills</summary>
+            <summary>Why this avoids surprise bills</summary>
             <div class="drawer-body">
               <p>
-                Because every assistant reads the exact same plain Markdown folder, switching from Antigravity to Claude or Codex requires zero migration or re-prompting. Staying on existing flat-rate plans guarantees extra metered API spend stays at $0 even during provider outages.
+                Because every assistant reads the same folder of notes, moving from Antigravity to Claude or Codex needs no copying and no repeating yourself. Many AI services also sell pay-per-use access (an API, where a program talks to the AI directly and is billed per word). This design only uses fixed monthly plans, so the extra pay-per-use cost stays at $0 even during an outage.
               </p>
             </div>
           </details>
@@ -367,14 +391,21 @@
         <div class="container">
           <div class="section-head">
             <div>
-              <div class="section-kicker">REFERENCE 03 &mdash; PORTABLE STRUCTURE</div>
+              <div class="section-kicker">PART 4 &mdash; WHAT IS IN THE MEMORY</div>
               <h2 class="section-title">Inside the 5 Folders</h2>
             </div>
             <p class="section-desc">
-              Click any folder to inspect its live Markdown file.
+              The whole memory is five ordinary folders of text files.
             </p>
           </div>
 
+          <div class="story-card">
+            <p><span class="story-beat">The problem</span>Chat apps bury what you told them inside long conversation histories that you cannot easily search, fix or take with you.</p>
+            <p><span class="story-beat">How it works</span>Each folder holds one kind of knowledge: rules for how to behave, facts about you, past mistakes to avoid, step-by-step recipes, and a log of everything done. They are written in Markdown, which is just plain text with a few symbols such as # for a heading and - for a bullet point.</p>
+            <p class="story-try"><span class="story-beat">Try this first</span>Click <strong>Lessons Learned</strong>. You will see a sample note: one correction written here is followed by all three AI apps from then on.</p>
+          </div>
+
+          
           <div class="explorer-layout">
             <div class="folder-list" id="folder-list" role="tablist" aria-label="Five brain folders">
               <!-- Populated by src/main.js -->
@@ -393,7 +424,7 @@
         <div>
           <div class="footer-title">Digital Brain Architecture &mdash; Mohammed KM</div>
           <p class="footer-note">
-            100% client-side interactive showcase using synthetic examples. Zero runtime APIs, zero tokens, zero personal data.
+            Everything on this page runs in your browser with made-up example data. No AI is called and no personal data is used.
           </p>
         </div>
         <div class="footer-meta">
