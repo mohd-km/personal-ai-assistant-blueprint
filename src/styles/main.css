@@ -2033,3 +2033,14 @@ button {
     font-size: 14px;
   }
 }
+
+/* Section links sit below the topbar (topbar holds only logo + project name). */
+.section-nav-row .site-nav {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  width: auto;
+  padding: 8px 0;
+  border-top: 0;
+}
