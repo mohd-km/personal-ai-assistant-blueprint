@@ -39,7 +39,7 @@ const STORAGE_META = {
   },
   git: {
     name: 'Git Repository',
-    busRule: 'Git is the single versioned transport bus; commit every material memory update cleanly.',
+    busRule: 'Git is the single versioned transport bus. Commit every material memory update as its own clean commit.',
     config: {
       primary_bus: 'git',
       branch: 'main',
@@ -107,7 +107,7 @@ export function generateAgentsMd(rawConfig) {
     ? 'Every outward action (email, external message, payment, or public publish) MUST pause at the Approval Gate and wait for explicit owner confirmation.'
     : 'Outward actions require explicit inline confirmation in the active session before firing.';
 
-  return `# Digital Brain — Shared Agent Rules (AGENTS.md)
+  return `# Digital Brain: Shared Agent Rules (AGENTS.md)
 
 Owner: ${cfg.ownerName}
 Storage Bus: ${storageInfo.name}
@@ -116,7 +116,7 @@ Approval Gate: ${cfg.approvalGate ? 'Enabled (strict outward lock)' : 'Session c
 ## 1. Startup Sequence
 
 1. Read \`memory/main.md\` and \`memory/handover/now.md\` before asking ${cfg.ownerName} to repeat context.
-2. Edit canonical Markdown cards in place—never create duplicate or timestamped copies.
+2. Edit the existing Markdown card in place. Never create duplicate or timestamped copies.
 3. Log every material action as one line in \`execution-trail/recent.md\`.
 
 ## 2. Storage & Sync Bus
@@ -126,11 +126,11 @@ Approval Gate: ${cfg.approvalGate ? 'Enabled (strict outward lock)' : 'Session c
 
 ## 3. Model Failover Waterfall
 
-Every assistant below reads the exact same folder on flat-rate plans ($0 surprise API fallback):
+Every assistant below reads the same folder and runs on a flat-rate plan, so switching adds $0 in pay-per-use (API) charges:
 
 ${modelWaterfall}
 
-If the active assistant is offline or rate-limited, route to the next available assistant in order with zero memory loss.
+If the active assistant is offline or rate-limited, route to the next available assistant in order. The notes are shared, so nothing is lost.
 
 ## 4. Channels & Safety Gate
 
@@ -185,7 +185,7 @@ export function generateConfigJson(rawConfig) {
 
 export function generateMainMemoryMd(rawConfig) {
   const cfg = normalizeBlueprintConfig(rawConfig);
-  return `# ${cfg.ownerName} — Memory Index (memory/main.md)
+  return `# ${cfg.ownerName}: Memory Index (memory/main.md)
 
 ## Quick Routes
 - Core rules: \`AGENTS.md\`

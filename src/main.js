@@ -781,7 +781,7 @@ function initBlueprintControls() {
           copyBtn.textContent = 'Copy';
         }, 1600);
       } catch {
-        setExportFeedback('Copy unavailable in this browser; use Download instead.');
+        setExportFeedback('Copy does not work in this browser. Use Download instead.');
       }
     });
   }

@@ -1,5 +1,5 @@
 /**
- * Digital Brain Architecture — Client-Side Sandbox & Blueprint Data
+ * Digital Brain Architecture: client-side sandbox and blueprint data
  * 100% synthetic examples. Zero PII, zero emojis, zero runtime tokens.
  */
 
@@ -15,7 +15,7 @@ export const PIPELINE_NODES = [
     role: 'where you type the request',
     summary: 'Finds the notes that matter for this request, in plain text files on your own machine, not locked inside any one company\'s app.',
     deepNote:
-      'If your laptop breaks, nothing is lost: it is just one window onto the folder. Any text editor or AI app can open the same folder and save small, clear changes straight into it.'
+      'If your laptop breaks, nothing is lost: it is only one window onto the folder. Any text editor or AI app can open the same folder and save small, clear changes straight into it.'
   },
   {
     id: 'drive-bus',
@@ -54,7 +54,7 @@ export const PIPELINE_NODES = [
     role: 'sends you the result',
     summary: 'Sends a short update to your phone through the Telegram chat app, and carries your one-tap answer back.',
     deepNote:
-      'Your phone becomes a simple remote control: short plain messages, progress pings and yes or no buttons, instead of a busy dashboard.'
+      'Your phone works as a remote control. You get short plain messages, progress pings and yes or no buttons rather than a busy dashboard.'
   },
   {
     id: 'approval-gate',
@@ -99,7 +99,7 @@ export const COMMAND_SCENARIOS = [
     },
     outcomeCancelled: {
       badge: 'SAFELY CANCELLED',
-      summary: 'Nothing was sent. Draft discarded cleanly and inbox stayed untouched.',
+      summary: 'Nothing was sent. The draft was discarded and your inbox is untouched.',
       detail: 'Blocked by owner at Approval Gate'
     }
   },
@@ -120,7 +120,7 @@ export const COMMAND_SCENARIOS = [
     },
     outcomeApproved: {
       badge: 'SAVED EVERYWHERE',
-      summary: 'Saved in plain Markdown; every assistant you open tomorrow already knows it.',
+      summary: 'Saved in plain Markdown, so every assistant you open tomorrow already knows it.',
       detail: 'Updated memory-cards/travel.md · 1 line logged'
     }
   },
@@ -135,13 +135,13 @@ export const COMMAND_SCENARIOS = [
     hopDetails: {
       laptop: 'Loaded rules/focus-hours.md + read-only calendar query',
       'drive-bus': 'Confirmed the focus-hours note is the latest version',
-      cloud: 'Computed open slots and ranked 2:00–4:30 PM top block',
+      cloud: 'Found the open slots and ranked 2:00 to 4:30 PM as the best block',
       telegram: 'Returned 3-line plain-text brief in 2 seconds',
       'approval-gate': 'PASSED: only reading, nothing can be changed'
     },
     outcomeApproved: {
       badge: 'CLEAR BRIEF',
-      summary: 'Returns 3 meetings and flags 2:00 PM – 4:30 PM as your cleanest focus window.',
+      summary: 'Returns 3 meetings and flags 2:00 PM to 4:30 PM as your cleanest focus window.',
       detail: 'Only reading · answered in 2.0 s · $0 pay-per-use cost'
     }
   },
@@ -204,13 +204,13 @@ export const BRAIN_FOLDERS = [
     headline: 'One rulebook read by every assistant.',
     shortSummary: 'Write your tone, formatting, and safety boundaries once in plain Markdown.',
     deepNote:
-      'Instead of repeating preferences inside every new chat window, every assistant reads the same rulebook before starting. Switching tools next month preserves every habit untouched.',
+      'Every assistant reads the same rulebook before it starts, so you stop repeating your preferences in each new chat. If you switch tools next month, the habits come with you.',
     sampleFile: 'rules/core-rules.md',
     sampleContent: `# Core Rules
 
 - Write in plain English with zero filler.
 - Never send emails or messages without approval.
-- Update the existing note; never make duplicates.
+- Update the existing note. Never make duplicates.
 - Check memory cards before asking me to repeat myself.`
   },
   {
@@ -221,7 +221,7 @@ export const BRAIN_FOLDERS = [
     headline: 'One tidy card per topic, never buried.',
     shortSummary: 'Short text cards you can edit, instead of facts lost in old chats.',
     deepNote:
-      'Locked-in chat histories bury key facts under hundreds of old messages. Short Markdown cards let you inspect, edit, or delete any fact in seconds with any text editor.',
+      'In a chat history, a key fact sits under hundreds of old messages. A short Markdown card can be checked, edited or deleted in seconds with any text editor.',
     sampleFile: 'memory-cards/travel.md',
     sampleContent: `# Travel Preferences
 
@@ -238,7 +238,7 @@ export const BRAIN_FOLDERS = [
     headline: 'Correct it once, every AI app learns.',
     shortSummary: 'Every correction saved here is followed by all three AI apps.',
     deepNote:
-      'In a normal chat app, correcting a mistake only fixes that single thread. Saving lessons in Markdown means Antigravity, Claude, and Codex all avoid the same error from that day forward.',
+      'In a normal chat app, a correction only fixes that one thread. Written here once, it is read by Antigravity, Claude and Codex, so none of them repeats the error.',
     sampleFile: 'lessons-learned/email-tone.md',
     sampleContent: `# Lessons Learned
 
@@ -252,9 +252,9 @@ export const BRAIN_FOLDERS = [
     path: 'brain/playbooks/',
     tag: 'Step-by-step recipes',
     headline: 'Turn recurring work into checklists.',
-    shortSummary: 'Store multi-step workflows once so any assistant runs the exact same format.',
+    shortSummary: 'Write a multi-step task down once and any assistant follows the same steps.',
     deepNote:
-      'Chat silos force you to re-explain recurring workflows from scratch. A Markdown playbook captures exact steps and output tables so any assistant produces consistent results on demand.',
+      'Without a written recipe, you explain the same weekly task again and again. A playbook stores the steps and the output table once, so any assistant returns the same format every time.',
     sampleFile: 'playbooks/comparison-brief.md',
     sampleContent: `# Comparison Brief Playbook
 
@@ -271,7 +271,7 @@ export const BRAIN_FOLDERS = [
     headline: 'One plain-text receipt per action.',
     shortSummary: 'See which assistant changed what, and when, in a plain list.',
     deepNote:
-      'When work is spread over several chat apps you lose track of what changed. This log only ever gets new lines added, never edited, so you can always check what happened and undo it.',
+      'When work is spread over several chat apps, you lose track of what changed. This log only ever gets new lines (old ones are never edited), so you can check what happened and undo it.',
     sampleFile: 'execution-trail/recent.md',
     sampleContent: `# Execution Trail
 
