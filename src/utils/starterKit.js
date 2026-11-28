@@ -6,22 +6,42 @@
 const CHANNEL_META = {
   telegram: {
     name: 'Telegram',
-    role: 'mobile commands, short digests, and approval-gate confirmations',
+    role: 'text chat, short cards with the detail one tap away, and approval buttons',
     config: {
       enabled: true,
       mode: 'bot_polling',
-      format: 'plain_text_under_80_words',
+      format: 'heading_plus_bullets_under_80_words',
+      expandable_detail: true,
       approval_reply_prefix: 'approve'
     }
   },
-  whatsapp: {
-    name: 'WhatsApp',
-    role: 'personal capture, voice-note intake, and verified contact replies',
+  voice: {
+    name: 'Phone line',
+    role: 'calls from your own number open the private lane, and every other caller gets a receptionist with no tools',
     config: {
       enabled: true,
-      mode: 'single_session_bridge',
-      allow_bulk_sends: false,
-      require_approval_for_external: true
+      owner_lane: 'trusted_number_plus_spoken_password',
+      guest_lane_tools: [],
+      max_call_minutes: 30,
+      quiet_mode_during_calls: true
+    }
+  },
+  email: {
+    name: 'Email',
+    role: 'mail from your own verified addresses runs as a task, and the answer comes back on Telegram',
+    config: {
+      enabled: true,
+      accept_from: 'owner_verified_addresses_only',
+      public_port: false
+    }
+  },
+  webapps: {
+    name: 'Private web apps',
+    role: 'small personal apps that open only after a Google sign-in with your own account',
+    config: {
+      enabled: true,
+      sign_in: 'google_owner_accounts_only',
+      session_days: 30
     }
   }
 };
@@ -60,23 +80,24 @@ const STORAGE_META = {
 };
 
 const MODEL_META = {
-  antigravity: {
-    name: 'Antigravity',
+  gemini: {
+    name: 'Gemini',
     provider: 'google',
+    runs_through: 'antigravity',
     billing: 'flat_rate_subscription',
-    strengths: ['routing', 'daily_notes', 'workspace_tasks']
-  },
-  claude: {
-    name: 'Claude',
-    provider: 'anthropic',
-    billing: 'flat_rate_subscription',
-    strengths: ['writing', 'planning', 'deep_reasoning']
+    strengths: ['fast_answers', 'research', 'everyday_tasks']
   },
   codex: {
     name: 'Codex',
     provider: 'openai',
     billing: 'flat_rate_subscription',
-    strengths: ['code_builds', 'verification', 'overnight_runs']
+    strengths: ['builds', 'checks', 'long_background_jobs']
+  },
+  claude: {
+    name: 'Claude',
+    provider: 'anthropic',
+    billing: 'flat_rate_subscription',
+    strengths: ['writing', 'planning', 'careful_reasoning']
   }
 };
 
@@ -89,7 +110,7 @@ export function normalizeBlueprintConfig(raw) {
     ownerName: (raw.ownerName || 'Owner').trim() || 'Owner',
     channels: channels.length > 0 ? channels : ['telegram'],
     storage,
-    models: models.length > 0 ? models : ['antigravity'],
+    models: models.length > 0 ? models : ['gemini'],
     approvalGate: raw.approvalGate !== false
   };
 }
@@ -104,7 +125,7 @@ export function generateAgentsMd(rawConfig) {
     .map((id, idx) => `${idx + 1}. **${MODEL_META[id].name}** (${MODEL_META[id].strengths.join(', ')})`)
     .join('\n');
   const gateRule = cfg.approvalGate
-    ? 'Every outward action (email, external message, payment, or public publish) MUST pause at the Approval Gate and wait for explicit owner confirmation.'
+    ? 'Money, publishing and anything that reaches another person (email, message, outside request) MUST pause at the Approval Gate until the owner taps approve. Everything else runs without asking, so the gate stays fast and worth reading.'
     : 'Outward actions require explicit inline confirmation in the active session before firing.';
 
   return `# Digital Brain: Shared Agent Rules (AGENTS.md)
@@ -130,7 +151,7 @@ Every assistant below reads the same folder and runs on a flat-rate plan, so swi
 
 ${modelWaterfall}
 
-If the active assistant is offline or rate-limited, route to the next available assistant in order. The notes are shared, so nothing is lost.
+If the active assistant is offline or at its usage limit, route to the next available assistant in order. The notes are shared, so nothing is lost. Warn the owner once when an engine is close to its limit, and skip an engine at its limit until it resets.
 
 ## 4. Channels & Safety Gate
 
@@ -138,7 +159,14 @@ ${channelLines}
 - **Safety Gate:** ${gateRule}
 - Private note updates and read-only lookups run automatically.
 
-## 5. Formatting & Restraint
+## 5. Where Work Runs
+
+- Long or heavy jobs are handed to the always-on cloud computer as their own background process, so the laptop can be closed at any time.
+- Hand over the conversation and any recently changed files with the job. A job never starts another job.
+- After every script edit, run a syntax check and that script's self-test before doing anything else.
+- Keep at most two AI workers warm; clear idle ones when memory runs low.
+
+## 6. Formatting & Restraint
 
 - Plain English, concise answers, zero filler, zero emojis.
 - Verify every script or build by running it before reporting done.
@@ -168,8 +196,16 @@ export function generateConfigJson(rawConfig) {
     })),
     safety: {
       approval_gate: cfg.approvalGate,
-      gated_actions: ['send_email', 'send_external_message', 'payment', 'delete_remote'],
-      auto_allowed_actions: ['read_memory', 'update_private_card', 'append_execution_trail']
+      gated_actions: ['payment', 'publish', 'send_email', 'send_external_message', 'outside_request'],
+      auto_allowed_actions: ['read_memory', 'update_private_card', 'research', 'append_execution_trail']
+    },
+    cloud: {
+      always_on: true,
+      handover_long_jobs: true,
+      jobs_survive_restarts: true,
+      self_test_after_script_edit: true,
+      max_warm_workers: 2,
+      engine_limit_warning: true
     },
     folders: [
       'rules/',
@@ -199,6 +235,7 @@ export function generateMainMemoryMd(rawConfig) {
 - Storage bus: ${STORAGE_META[cfg.storage].name}
 - Channels: ${cfg.channels.map((id) => CHANNEL_META[id].name).join(', ')}
 - Failover order: ${cfg.models.map((id) => MODEL_META[id].name).join(' -> ')}
+- Long jobs: handed to the cloud computer; the laptop can be closed
 `;
 }
 

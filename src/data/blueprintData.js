@@ -5,17 +5,17 @@
 
 export const PIPELINE_NODES = [
   {
-    id: 'laptop',
+    id: 'door',
     index: 0,
-    shortLabel: 'Laptop',
-    subLabel: 'Your computer',
+    shortLabel: 'Front door',
+    subLabel: 'Chat, call, email, app',
     x: 92,
     y: 112,
-    latencyMs: 12,
-    role: 'where you type the request',
-    summary: 'Finds the notes that matter for this request, in plain text files on your own machine, not locked inside any one company\'s app.',
+    latencyMs: 40,
+    role: 'where the request comes in',
+    summary: 'You can ask from Telegram, by calling a phone line, by emailing the assistant, or from one of three private web apps. Every door leads to the same brain.',
     deepNote:
-      'If your laptop breaks, nothing is lost: it is only one window onto the folder. Any text editor or AI app can open the same folder and save small, clear changes straight into it.'
+      'The doors only carry words in and answers out. None of them keeps its own memory, so a task started on a call can be continued in Telegram, and the private web apps open only after a Google sign-in with your own account.'
   },
   {
     id: 'drive-bus',
@@ -26,48 +26,48 @@ export const PIPELINE_NODES = [
     y: 112,
     latencyMs: 140,
     role: 'keeps every device in step',
-    summary: 'Copies the notes between your laptop and the cloud computer through one shared folder (for example Google Drive), so both always see the same thing.',
+    summary: 'One shared folder (for example Google Drive) holds the notes. The cloud computer and your laptop each keep a synced copy, so both always see the same thing.',
     deepNote:
-      'One shared folder means no stray copies drifting apart. Within seconds every machine has the same rules, notes and log.'
+      'One folder means no stray copies drifting apart. Changes reach every machine within minutes, and a short note is attached to each request with only the rules and facts that matter for it.'
   },
   {
     id: 'cloud',
     index: 2,
     shortLabel: 'Cloud',
-    subLabel: 'Always switched on',
+    subLabel: 'On 24/7',
     x: 456,
     y: 112,
     latencyMs: 280,
-    role: 'where the AI does the work',
-    summary: 'A computer in a data centre runs the AI app (Antigravity, Claude or Codex), so work carries on even while your laptop sleeps.',
+    role: 'where the work is done',
+    summary: 'An always-on computer in a data centre runs the AI engines (Gemini, Codex and Claude), so work carries on while your laptop is closed.',
     deepNote:
-      'The cloud computer opens the same shared folder and tries the AI apps in order. If the first one reaches its usage limit or goes down, the next one picks up with the same notes, so nothing is forgotten.'
+      'Engines are tried in order. If the first is near its usage limit you get one warning, and once it hits the limit the next one picks up with the same notes. Long jobs run as their own background process, so they survive restarts.'
   },
   {
     id: 'telegram',
     index: 3,
-    shortLabel: 'Telegram',
-    subLabel: 'Your phone',
+    shortLabel: 'Your phone',
+    subLabel: 'Short card',
     x: 638,
     y: 112,
     latencyMs: 95,
-    role: 'sends you the result',
-    summary: 'Sends a short update to your phone through the Telegram chat app, and carries your one-tap answer back.',
+    role: 'brings the answer back',
+    summary: 'The answer arrives on Telegram as a short card: a heading and two or three lines, with the full detail one tap away.',
     deepNote:
-      'Your phone works as a remote control. You get short plain messages, progress pings and yes or no buttons rather than a busy dashboard.'
+      'Unprompted messages are capped at a few a day and stay quiet at night. Approvals arrive as one-tap buttons instead of a busy dashboard.'
   },
   {
     id: 'approval-gate',
     index: 4,
     shortLabel: 'Approval Gate',
-    subLabel: 'Waits for your OK',
+    subLabel: 'Only for big steps',
     x: 820,
     y: 112,
     latencyMs: 0,
     role: 'the final safety check',
-    summary: 'Lets private notes and lookups through, but holds every email, message or payment to other people until you tap OK.',
+    summary: 'Money, publishing and messages to other people wait here for your tap. Notes, lookups and research go straight through.',
     deepNote:
-      'Work that runs while you are away is limited to private tasks. Anything that would reach another person is stopped here and cannot happen until you say yes.'
+      'The gate is narrow on purpose. If it asked about everything, you would stop reading it. It only stops actions that are hard to undo or that reach someone else.'
   }
 ];
 
@@ -75,10 +75,12 @@ export const COMMAND_SCENARIOS = [
   {
     id: 'email',
     label: 'Send a client email',
-    category: 'Sends to someone',
+    category: 'Reaches someone else',
+    door: 'APP',
+    doorName: 'a private web app',
     prompt: '"Email Alex at Studio North with the revised timeline and confirm Thursday at 3 PM."',
-    preferredHarness: 'Claude',
     needsApproval: true,
+    holdLabel: 'EMAIL ON HOLD',
     packetTag: 'EMAIL TO SOMEONE',
     draftPreview: {
       to: 'Alex, Studio North (made-up example)',
@@ -86,15 +88,15 @@ export const COMMAND_SCENARIOS = [
       body: 'Hi Alex, sharing the updated two-week milestones below. Does Thursday at 3 PM still work to walk through them?'
     },
     hopDetails: {
-      laptop: 'Matched rules/writing-tone.md + memory-cards/studio-north.md',
-      'drive-bus': 'Copied 2 relevant notes (4.2 KB, about a page of text) to the cloud computer',
-      cloud: 'The AI app on duty wrote a short draft reply',
+      door: 'Typed into the private web app after a Google sign-in',
+      'drive-bus': 'Attached 2 relevant notes (4.2 KB, about a page of text): writing tone and the Studio North card',
+      cloud: 'The engine on duty wrote a short draft reply',
       telegram: 'Sent the draft to your phone with approve and cancel buttons',
       'approval-gate': 'ON HOLD: the email waits until you tap approve'
     },
     outcomeApproved: {
       badge: 'SENT AFTER APPROVAL',
-      summary: 'The email went out only after your tap, and a one-line receipt was added to the log folder (execution-trail).',
+      summary: 'The email went out only after your tap, and one line was added to the log folder (execution-trail).',
       detail: 'Delivered to Alex · logged to execution-trail/recent.md'
     },
     outcomeCancelled: {
@@ -104,16 +106,50 @@ export const COMMAND_SCENARIOS = [
     }
   },
   {
+    id: 'pay',
+    label: 'Pay a bill',
+    category: 'Money',
+    door: 'CHAT',
+    doorName: 'Telegram',
+    prompt: '"Pay this month\'s electricity bill from the usual account."',
+    needsApproval: true,
+    holdLabel: 'PAYMENT ON HOLD',
+    packetTag: 'MONEY',
+    draftPreview: {
+      to: 'City Power (made-up example)',
+      subject: 'Electricity bill, November: 1,240 rupees',
+      body: 'Ready to pay from the usual account. Nothing moves until you approve.'
+    },
+    hopDetails: {
+      door: 'Typed into Telegram',
+      'drive-bus': 'Attached the bills card and the rule that money always needs a tap',
+      cloud: 'Read the bill and filled in the payment up to the last step',
+      telegram: 'Sent a card with the amount and approve and cancel buttons',
+      'approval-gate': 'ON HOLD: money never moves without your tap'
+    },
+    outcomeApproved: {
+      badge: 'PAID AFTER APPROVAL',
+      summary: 'Paid only after your tap. The receipt was saved and one line added to the log.',
+      detail: 'Paid 1,240 rupees · receipt saved · logged'
+    },
+    outcomeCancelled: {
+      badge: 'SAFELY CANCELLED',
+      summary: 'Nothing was paid. The bill stays on your list.',
+      detail: 'Blocked by owner at Approval Gate'
+    }
+  },
+  {
     id: 'travel',
     label: 'Remember travel preference',
     category: 'Save a note',
+    door: 'CALL',
+    doorName: 'the phone line',
     prompt: '"Book window seats on morning flights and aisle seats on flights over four hours."',
-    preferredHarness: 'Antigravity',
     needsApproval: false,
     packetTag: 'PRIVATE NOTE',
     hopDetails: {
-      laptop: 'Routed to existing memory-cards/travel.md (18 lines)',
-      'drive-bus': 'Copied the one changed line (142 bytes) to the cloud computer',
+      door: 'Said on a call to the phone line',
+      'drive-bus': 'Found the existing travel card (18 lines) and changed one line (142 bytes)',
       cloud: 'Checked the note is tidy and updated the notes index',
       telegram: 'Finished quietly: no need to disturb your phone',
       'approval-gate': 'PASSED: a private note, nothing sent to anyone'
@@ -128,15 +164,16 @@ export const COMMAND_SCENARIOS = [
     id: 'schedule',
     label: "Check today's schedule",
     category: 'Quick lookup',
+    door: 'CHAT',
+    doorName: 'Telegram',
     prompt: '"What is on my calendar today, and where is my cleanest 2-hour deep-work block?"',
-    preferredHarness: 'Antigravity',
     needsApproval: false,
     packetTag: 'LOOKUP ONLY',
     hopDetails: {
-      laptop: 'Loaded rules/focus-hours.md + read-only calendar query',
-      'drive-bus': 'Confirmed the focus-hours note is the latest version',
+      door: 'Typed into Telegram',
+      'drive-bus': 'Attached the focus-hours note',
       cloud: 'Found the open slots and ranked 2:00 to 4:30 PM as the best block',
-      telegram: 'Returned 3-line plain-text brief in 2 seconds',
+      telegram: 'Returned a 3-line answer in about 2 seconds',
       'approval-gate': 'PASSED: only reading, nothing can be changed'
     },
     outcomeApproved: {
@@ -147,17 +184,18 @@ export const COMMAND_SCENARIOS = [
   },
   {
     id: 'research',
-    label: 'Run overnight research',
+    label: 'Hand over an overnight build',
     category: 'Background work',
-    prompt: '"Compare three lightweight static hosts and leave a 1-page table by 7 AM."',
-    preferredHarness: 'Codex',
+    door: 'EMAIL',
+    doorName: 'email',
+    prompt: '"Compare three lightweight static hosts and leave a 1-page table by 7 AM. I am closing my laptop."',
     needsApproval: false,
-    packetTag: 'OVERNIGHT JOB',
+    packetTag: 'CLOUD JOB',
     hopDetails: {
-      laptop: 'Picked the comparison recipe (playbooks/comparison-brief.md) before bed',
-      'drive-bus': 'Copied the task to the always-on cloud computer',
-      cloud: 'Did the comparison overnight on a fixed monthly plan',
-      telegram: 'Sent 7:00 AM digest link to memory-cards/hosting-comparison.md',
+      door: 'Sent by email to the assistant\'s own address (only mail from your addresses runs)',
+      'drive-bus': 'Copied the request and the comparison recipe to the cloud computer',
+      cloud: 'Ran overnight as its own background job, laptop closed the whole time',
+      telegram: 'Sent a 7:00 AM card: heading, two lines, tap for the full table',
       'approval-gate': 'PASSED: a private research note, nothing sent to anyone'
     },
     outcomeApproved: {
@@ -170,28 +208,28 @@ export const COMMAND_SCENARIOS = [
 
 export const FAILOVER_PROVIDERS = [
   {
-    id: 'antigravity',
+    id: 'gemini',
     priority: 1,
-    name: 'Antigravity',
-    role: 'Primary everyday driver',
+    name: 'Gemini',
+    role: 'First choice (runs through Antigravity)',
     plan: 'Fixed monthly plan',
-    strength: 'Fast routing, daily notes, and interactive workspace work.'
-  },
-  {
-    id: 'claude',
-    priority: 2,
-    name: 'Claude',
-    role: 'First automatic backup',
-    plan: 'Fixed monthly plan',
-    strength: 'Writing, structured planning, and careful reasoning.'
+    strength: 'Fast answers, research and everyday tasks.'
   },
   {
     id: 'codex',
-    priority: 3,
+    priority: 2,
     name: 'Codex',
+    role: 'First automatic backup',
+    plan: 'Fixed monthly plan',
+    strength: 'Builds, checks and long background jobs.'
+  },
+  {
+    id: 'claude',
+    priority: 3,
+    name: 'Claude',
     role: 'Second automatic backup',
     plan: 'Fixed monthly plan',
-    strength: 'Background builds, verification checks, and overnight runs.'
+    strength: 'Writing, planning and careful reasoning.'
   }
 ];
 
@@ -238,7 +276,7 @@ export const BRAIN_FOLDERS = [
     headline: 'Correct it once, every AI app learns.',
     shortSummary: 'Every correction saved here is followed by all three AI apps.',
     deepNote:
-      'In a normal chat app, a correction only fixes that one thread. Written here once, it is read by Antigravity, Claude and Codex, so none of them repeats the error.',
+      'In a normal chat app, a correction only fixes that one thread. Written here once, it is read by Gemini, Codex and Claude, so none of them repeats the error.',
     sampleFile: 'lessons-learned/email-tone.md',
     sampleContent: `# Lessons Learned
 
@@ -275,7 +313,7 @@ export const BRAIN_FOLDERS = [
     sampleFile: 'execution-trail/recent.md',
     sampleContent: `# Execution Trail
 
-- 09:10 | Antigravity | Updated memory-cards/travel.md
+- 09:10 | Gemini      | Updated memory-cards/travel.md
 - 11:30 | Claude      | Drafted Studio North email (approved)
 - 23:00 | Codex       | Saved hosting comparison brief`
   }
@@ -286,12 +324,22 @@ export const BLUEPRINT_OPTIONS = {
     {
       id: 'telegram',
       label: 'Telegram',
-      detail: 'Mobile commands, digests & one-tap approvals'
+      detail: 'Text chat, short cards and one-tap approvals'
     },
     {
-      id: 'whatsapp',
-      label: 'WhatsApp',
-      detail: 'Personal notes, voice capture & family bridge'
+      id: 'voice',
+      label: 'Phone line',
+      detail: 'Call it and talk, in a copy of your voice'
+    },
+    {
+      id: 'email',
+      label: 'Email',
+      detail: 'Mail from your own addresses runs as a task'
+    },
+    {
+      id: 'webapps',
+      label: 'Private web apps',
+      detail: 'Open only after a Google sign-in as you'
     }
   ],
   storage: [
@@ -313,19 +361,19 @@ export const BLUEPRINT_OPTIONS = {
   ],
   models: [
     {
-      id: 'antigravity',
-      label: 'Antigravity',
+      id: 'gemini',
+      label: 'Gemini',
       detail: 'First choice for everyday work'
-    },
-    {
-      id: 'claude',
-      label: 'Claude',
-      detail: 'Writing, planning & careful reasoning'
     },
     {
       id: 'codex',
       label: 'Codex',
-      detail: 'Long jobs and overnight checks'
+      detail: 'Builds and long background jobs'
+    },
+    {
+      id: 'claude',
+      label: 'Claude',
+      detail: 'Writing, planning and careful reasoning'
     }
   ]
 };

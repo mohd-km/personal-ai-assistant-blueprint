@@ -12,6 +12,7 @@ import {
   createZipBlob,
   triggerDownload
 } from './utils/starterKit.js';
+import { initHandover } from './handover.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -28,17 +29,22 @@ const state = {
 
   // Failover state
   providersOnline: {
-    antigravity: true,
-    claude: true,
-    codex: true
+    gemini: true,
+    codex: true,
+    claude: true
+  },
+  providersAtLimit: {
+    gemini: false,
+    codex: false,
+    claude: false
   },
 
   // Blueprint generator state
   builder: {
     ownerName: 'Alex',
-    channels: ['telegram'],
+    channels: ['telegram', 'voice'],
     storage: 'drive',
-    models: ['antigravity', 'claude', 'codex'],
+    models: ['gemini', 'codex', 'claude'],
     approvalGate: true,
     activeTab: 'agents'
   },
@@ -60,7 +66,9 @@ function escapeHtml(value) {
 }
 
 function getActiveProvider() {
-  return FAILOVER_PROVIDERS.find((p) => state.providersOnline[p.id]) || null;
+  return (
+    FAILOVER_PROVIDERS.find((p) => state.providersOnline[p.id] && !state.providersAtLimit[p.id]) || null
+  );
 }
 
 function getActiveScenario() {
@@ -254,8 +262,18 @@ function renderSvgPipeline() {
     idxText.textContent = `0${idx + 1}`;
     g.appendChild(idxText);
 
-    // Dynamic badge top-right for Cloud & Approval Gate
-    if (node.id === 'cloud') {
+    // Dynamic badge top-right for Front door, Cloud & Approval Gate
+    if (node.id === 'door') {
+      const doorBadge = createSvgEl('text', {
+        x: node.x + 50,
+        y: node.y - 22,
+        'text-anchor': 'end',
+        class: 'svg-node-badge'
+      });
+      doorBadge.textContent = scenario.door || '';
+      doorBadge.setAttribute('fill', '#1e40af');
+      g.appendChild(doorBadge);
+    } else if (node.id === 'cloud') {
       const modelBadge = createSvgEl('text', {
         x: node.x + 50,
         y: node.y - 22,
@@ -423,7 +441,7 @@ function renderTelemetryAndGate() {
   if (telemetryEl) {
     telemetryEl.innerHTML = `
       <div class="telemetry-cell">
-        <div class="telemetry-label">AI app on duty</div>
+        <div class="telemetry-label">Engine on duty</div>
         <div class="telemetry-val ${activeProvider ? 'is-ok' : 'is-warn'}">
           ${activeProvider ? escapeHtml(activeProvider.name) : 'All Offline'}
         </div>
@@ -451,7 +469,7 @@ function renderTelemetryAndGate() {
     drawerEl.innerHTML = `
       <div class="approval-head">
         <h3 class="approval-title">Approval gate: waiting for your decision</h3>
-        <span class="step-pill pill-warn">EMAIL ON HOLD</span>
+        <span class="step-pill pill-warn">${escapeHtml(scenario.holdLabel || 'ON HOLD')}</span>
       </div>
       <div class="approval-draft">
         <p><strong>To:</strong> ${escapeHtml(scenario.draftPreview.to)}</p>
@@ -459,8 +477,8 @@ function renderTelemetryAndGate() {
         <p>${escapeHtml(scenario.draftPreview.body)}</p>
       </div>
       <div class="approval-actions">
-        <button type="button" class="btn btn-ok" id="approve-send-btn">Approve &amp; Send</button>
-        <button type="button" class="btn-ghost" id="cancel-send-btn">Cancel Send</button>
+        <button type="button" class="btn btn-ok" id="approve-send-btn">Approve</button>
+        <button type="button" class="btn-ghost" id="cancel-send-btn">Cancel</button>
       </div>
     `;
 
@@ -725,7 +743,7 @@ function renderBlueprintBuilder() {
       .join(' → ');
 
     topologyEl.innerHTML = `
-      YOUR SETUP: <strong>Laptop</strong> &rarr; <strong>${escapeHtml(storageLabel)}</strong> &rarr; <strong>${escapeHtml(modelLabels)}</strong> &rarr; <strong>${escapeHtml(channelLabels)}</strong> &rarr; <strong>${state.builder.approvalGate ? 'Approval gate' : 'Quick confirm in chat'}</strong>
+      YOUR SETUP: <strong>Front door</strong> &rarr; <strong>${escapeHtml(storageLabel)}</strong> &rarr; <strong>${escapeHtml(modelLabels)}</strong> &rarr; <strong>${escapeHtml(channelLabels)}</strong> &rarr; <strong>${state.builder.approvalGate ? 'Approval gate' : 'Quick confirm in chat'}</strong>
     `;
   }
 
@@ -828,22 +846,30 @@ function renderFailover() {
   if (!statusBar || !waterfall || !emptyBanner) return;
 
   const active = getActiveProvider();
-  const onlineCount = FAILOVER_PROVIDERS.filter((p) => state.providersOnline[p.id]).length;
+  const onlineCount = FAILOVER_PROVIDERS.filter(
+    (p) => state.providersOnline[p.id] && !state.providersAtLimit[p.id]
+  ).length;
+  const atLimit = FAILOVER_PROVIDERS.filter((p) => state.providersOnline[p.id] && state.providersAtLimit[p.id]);
 
   statusBar.innerHTML = `
     <div class="status-tile">
-      <div class="status-tile-label">AI app on duty</div>
+      <div class="status-tile-label">Engine on duty</div>
       <div class="status-tile-value ${active ? 'is-ok' : 'is-warn'}">
         ${active ? escapeHtml(active.name) : 'Paused'}
       </div>
       <p class="status-tile-note">
-        ${active ? (active.priority === 1 ? 'First choice is handling requests.' : `Backup in use: ${active.name} took over.`) : 'All three are switched off.'}
+        ${active ? (active.priority === 1 ? 'First choice is handling requests.' : `Backup in use: ${active.name} took over.`) : 'None of the three is available.'}
       </p>
+    </div>
+    <div class="status-tile">
+      <div class="status-tile-label">Limit warnings</div>
+      <div class="status-tile-value ${atLimit.length ? 'is-warn' : 'is-ok'}">${atLimit.length ? `${atLimit.length} sent` : 'None'}</div>
+      <p class="status-tile-note">${atLimit.length ? `${escapeHtml(atLimit.map((p) => p.name).join(' and '))} hit the usage limit. You got one short warning, and it is skipped until it resets.` : 'You hear about a limit once, before it gets in the way.'}</p>
     </div>
     <div class="status-tile">
       <div class="status-tile-label">Shared notes</div>
       <div class="status-tile-value is-ok">All there</div>
-      <p class="status-tile-note">${onlineCount} online assistant${onlineCount === 1 ? '' : 's'} reading the same folder.</p>
+      <p class="status-tile-note">${onlineCount} available engine${onlineCount === 1 ? '' : 's'} reading the same folder.</p>
     </div>
     <div class="status-tile">
       <div class="status-tile-label">Pay-per-use cost</div>
@@ -854,11 +880,12 @@ function renderFailover() {
 
   waterfall.innerHTML = FAILOVER_PROVIDERS.map((provider) => {
     const isOnline = Boolean(state.providersOnline[provider.id]);
+    const isLimited = isOnline && Boolean(state.providersAtLimit[provider.id]);
     const isServing = active && active.id === provider.id;
 
-    const cardClass = isServing ? 'is-serving' : !isOnline ? 'is-offline' : '';
-    const pillClass = isServing ? 'pill-ok' : isOnline ? 'pill-neutral' : 'pill-block';
-    const badgeLabel = isServing ? 'ACTIVE NOW' : isOnline ? 'READY AS BACKUP' : 'OFFLINE';
+    const cardClass = isServing ? 'is-serving' : !isOnline || isLimited ? 'is-offline' : '';
+    const pillClass = isServing ? 'pill-ok' : isLimited ? 'pill-warn' : isOnline ? 'pill-neutral' : 'pill-block';
+    const badgeLabel = isServing ? 'ACTIVE NOW' : isLimited ? 'AT USAGE LIMIT' : isOnline ? 'READY AS BACKUP' : 'OFFLINE';
 
     return `
       <article class="provider-card ${cardClass}">
@@ -884,10 +911,28 @@ function renderFailover() {
             <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
             <span>${isOnline ? 'Online' : 'Offline'}</span>
           </button>
+          <button
+            type="button"
+            class="btn-mini"
+            data-limit-id="${escapeHtml(provider.id)}"
+            aria-pressed="${isLimited}"
+            ${isOnline ? '' : 'disabled'}
+          >${isLimited ? 'Reset the limit' : 'Use up its limit'}</button>
         </div>
       </article>
     `;
   }).join('');
+
+  waterfall.querySelectorAll('[data-limit-id]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-limit-id');
+      if (!id) return;
+      state.providersAtLimit[id] = !state.providersAtLimit[id];
+      renderFailover();
+      renderSvgPipeline();
+      renderTelemetryAndGate();
+    });
+  });
 
   waterfall.querySelectorAll('.switch-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -967,6 +1012,7 @@ function init() {
   renderBlueprintBuilder();
   renderFailover();
   renderFolderExplorer();
+  initHandover();
   runPacketSimulation(COMMAND_SCENARIOS[0].id);
 
   const speedInput = document.getElementById('packet-speed');
@@ -988,7 +1034,8 @@ function init() {
   const restoreBtn = document.getElementById('restore-providers-btn');
   if (restoreBtn) {
     restoreBtn.addEventListener('click', () => {
-      state.providersOnline = { antigravity: true, claude: true, codex: true };
+      state.providersOnline = { gemini: true, codex: true, claude: true };
+      state.providersAtLimit = { gemini: false, codex: false, claude: false };
       renderFailover();
       renderSvgPipeline();
       renderTelemetryAndGate();

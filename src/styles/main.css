@@ -711,7 +711,7 @@ button {
 /* SIMULATION 1: PACKET ROUTER */
 .command-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -1432,7 +1432,7 @@ button {
 /* SIMULATION 2: FAILOVER SWITCH */
 .failover-status-bar {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 16px;
 }
@@ -1564,6 +1564,7 @@ button {
 
 .provider-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -1862,7 +1863,8 @@ button {
     gap: 14px;
   }
 
-  .command-grid {
+  .command-grid,
+  .failover-status-bar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -2043,4 +2045,196 @@ button {
   width: auto;
   padding: 8px 0;
   border-top: 0;
+}
+
+/* Part 2: close the laptop */
+.ho-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.ho-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ho-machines {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ho-machine {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  min-width: 0;
+  transition: border-color var(--transition), background-color var(--transition);
+}
+
+.ho-machine.is-busy {
+  border-color: var(--accent-border);
+  background: var(--accent-soft);
+}
+
+.ho-machine.is-off {
+  background: var(--surface-alt);
+  color: var(--ink-muted);
+}
+
+.ho-machine-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-secondary);
+}
+
+.ho-machine-state {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.ho-machine-note {
+  margin: 4px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-secondary);
+}
+
+.ho-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+  overflow: hidden;
+}
+
+.ho-progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 100ms linear;
+}
+
+.ho-status {
+  font-size: 14px;
+}
+
+.ho-bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.ho-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ho-step {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.ho-step-num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+
+.ho-step.is-now {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.ho-step.is-done {
+  color: var(--ink);
+}
+
+.ho-step.is-done .ho-step-num {
+  color: var(--ok);
+}
+
+.ho-step.is-cut {
+  color: var(--block);
+  font-weight: 600;
+}
+
+.ho-card {
+  padding: 14px 16px;
+  border: 1px solid var(--ok-border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ho-card.is-empty {
+  border-style: dashed;
+  border-color: var(--border-strong);
+  color: var(--ink-secondary);
+}
+
+.ho-card-head {
+  font-weight: 600;
+}
+
+.ho-card-lines {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.ho-card-detail {
+  margin: 0;
+  color: var(--ink-secondary);
+}
+
+.reliability-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.reliability-item h3 {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  margin: 0 0 4px;
+}
+
+.reliability-item p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-secondary);
+}
+
+@media (max-width: 767px) {
+  .ho-machines,
+  .ho-bottom,
+  .reliability-grid {
+    grid-template-columns: 1fr;
+  }
 }
